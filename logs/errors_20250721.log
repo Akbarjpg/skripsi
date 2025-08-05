@@ -1,0 +1,2 @@
+2025-07-21 16:00:54 | src.core.app_launcher | [31mERROR[0m | [ERROR] Failed to start web application: cannot import name 'request' from 'flask_socketio' (D:\Codingan\skripsi\dari nol\.venv\Lib\site-packages\flask_socketio\__init__.py)
+2025-07-21 16:00:54 | __main__ | [31mERROR[0m | [ERROR] Application failed: cannot import name 'request' from 'flask_socketio' (D:\Codingan\skripsi\dari nol\.venv\Lib\site-packages\flask_socketio\__init__.py)

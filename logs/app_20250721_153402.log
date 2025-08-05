@@ -1,0 +1,49 @@
+2025-07-21 15:34:02 | src.utils.logger | [32mINFO[0m | Logging system initialized
+2025-07-21 15:34:02 | src.utils.logger | DEBUG | Log level: INFO
+2025-07-21 15:34:02 | src.utils.logger | DEBUG | Log file: logs\app_20250721_153402.log
+2025-07-21 15:34:02 | __main__ | [32mINFO[0m | ============================================================
+2025-07-21 15:34:02 | __main__ | [32mINFO[0m | FACE ANTI-SPOOFING ATTENDANCE SYSTEM
+2025-07-21 15:34:02 | __main__ | [32mINFO[0m | ============================================================
+2025-07-21 15:34:02 | __main__ | [32mINFO[0m | Mode: web
+2025-07-21 15:34:02 | __main__ | [32mINFO[0m | Config: config/default.json
+2025-07-21 15:34:02 | __main__ | [32mINFO[0m | Debug: False
+2025-07-21 15:34:02 | src.utils.config | [33mWARNING[0m | Failed to load config from D:\Codingan\skripsi\dari nol\config\default.json: TrainingConfig.__init__() got an unexpected keyword argument 'optimizer'
+2025-07-21 15:34:02 | src.utils.config | [32mINFO[0m | Using default configuration
+2025-07-21 15:34:02 | src.core.app_launcher | [32mINFO[0m | [OK] Application launcher initialized
+2025-07-21 15:34:02 | src.core.app_launcher | [32mINFO[0m | [START] Starting web application...
+2025-07-21 15:34:03 | src.core.app_launcher | [32mINFO[0m | Press Ctrl+C to stop the server
+2025-07-21 15:34:07 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhvtcr
+2025-07-21 15:34:11 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhvumA
+2025-07-21 15:34:13 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhvv4a
+2025-07-21 15:34:13 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhvv9v
+2025-07-21 15:34:15 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhvvfb
+2025-07-21 15:34:19 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhvwYK
+2025-07-21 15:34:19 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhvwiD
+2025-07-21 15:34:24 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhvx_Z
+2025-07-21 15:34:25 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhvy02
+2025-07-21 15:34:30 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhvzDv
+2025-07-21 15:34:31 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhvzTq
+2025-07-21 15:34:35 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhv-SC
+2025-07-21 15:34:37 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhv-xZ
+2025-07-21 15:34:40 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhv_gY
+2025-07-21 15:34:43 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhw0P8
+2025-07-21 15:34:45 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhw0uq
+2025-07-21 15:34:49 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhw1t4
+2025-07-21 15:34:50 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhw27G
+2025-07-21 15:34:55 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhw3Kq
+2025-07-21 15:34:55 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhw3Lu
+2025-07-21 15:35:00 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhw4fA
+2025-07-21 15:35:01 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhw4oY
+2025-07-21 15:35:05 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhw5tU
+2025-07-21 15:35:06 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhw68Q
+2025-07-21 15:35:07 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhw6G6
+2025-07-21 15:35:07 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhw6Qi
+2025-07-21 15:35:13 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhw7ju
+2025-07-21 15:35:14 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhw82X
+2025-07-21 15:35:15 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhw8GQ
+2025-07-21 15:35:17 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhw8pW
+2025-07-21 15:35:19 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhw9Bb
+2025-07-21 15:35:19 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhw9Kt
+2025-07-21 15:35:21 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhw9g2
+2025-07-21 15:35:22 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhwA0k
+2025-07-21 15:35:23 | web | [33mWARNING[0m | 404 error: http://localhost:5000/socket.io/?EIO=4&transport=polling&t=PWhwAKD

@@ -1,0 +1,26 @@
+2025-07-21 16:04:06 | src.utils.logger | [32mINFO[0m | Logging system initialized
+2025-07-21 16:04:06 | src.utils.logger | DEBUG | Log level: INFO
+2025-07-21 16:04:06 | src.utils.logger | DEBUG | Log file: logs\app_20250721_160406.log
+2025-07-21 16:04:06 | __main__ | [32mINFO[0m | ============================================================
+2025-07-21 16:04:06 | __main__ | [32mINFO[0m | FACE ANTI-SPOOFING ATTENDANCE SYSTEM
+2025-07-21 16:04:06 | __main__ | [32mINFO[0m | ============================================================
+2025-07-21 16:04:06 | __main__ | [32mINFO[0m | Mode: web
+2025-07-21 16:04:06 | __main__ | [32mINFO[0m | Config: config/default.json
+2025-07-21 16:04:06 | __main__ | [32mINFO[0m | Debug: False
+2025-07-21 16:04:06 | src.utils.config | [33mWARNING[0m | Failed to load config from D:\Codingan\skripsi\dari nol\config\default.json: DataConfig.__init__() got an unexpected keyword argument 'dataset_path'
+2025-07-21 16:04:06 | src.utils.config | [32mINFO[0m | Using default configuration
+2025-07-21 16:04:06 | src.core.app_launcher | [32mINFO[0m | [OK] Application launcher initialized
+2025-07-21 16:04:06 | src.core.app_launcher | [32mINFO[0m | [START] Starting web application...
+2025-07-21 16:04:07 | src.core.app_launcher | [32mINFO[0m | Press Ctrl+C to stop the server
+2025-07-21 16:04:38 | web | [32mINFO[0m | Client connected to landmark detection
+2025-07-21 16:04:54 | web | [32mINFO[0m | Client disconnected from landmark detection
+2025-07-21 16:04:56 | web | [32mINFO[0m | Processed frame for session: 03087ed7-41fb-439e-a64b-d4c3f9497bb1
+2025-07-21 16:04:56 | web | [32mINFO[0m | Processed frame for session: 03087ed7-41fb-439e-a64b-d4c3f9497bb1
+2025-07-21 16:04:56 | web | [32mINFO[0m | Processed frame for session: 03087ed7-41fb-439e-a64b-d4c3f9497bb1
+2025-07-21 16:04:56 | web | [32mINFO[0m | Processed frame for session: 03087ed7-41fb-439e-a64b-d4c3f9497bb1
+2025-07-21 16:04:56 | web | [32mINFO[0m | Processed frame for session: 03087ed7-41fb-439e-a64b-d4c3f9497bb1
+2025-07-21 16:04:56 | web | [32mINFO[0m | Processed frame for session: 03087ed7-41fb-439e-a64b-d4c3f9497bb1
+2025-07-21 16:04:56 | web | [32mINFO[0m | Processed frame for session: 03087ed7-41fb-439e-a64b-d4c3f9497bb1
+2025-07-21 16:04:56 | web | [32mINFO[0m | Processed frame for session: 03087ed7-41fb-439e-a64b-d4c3f9497bb1
+2025-07-21 16:04:56 | web | [32mINFO[0m | Processed frame for session: 03087ed7-41fb-439e-a64b-d4c3f9497bb1
+2025-07-21 16:05:15 | web | [33mWARNING[0m | 404 error: http://localhost:5000/.well-known/appspecific/com.chrome.devtools.json

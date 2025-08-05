@@ -1,0 +1,58 @@
+{
+  "model": {
+    "architecture": "custom_cnn",
+    "num_classes": 2,
+    "input_size": [
+      128,
+      128
+    ],
+    "dropout_rate": 0.3,
+    "pretrained": true,
+    "freeze_backbone": false
+  },
+  "training": {
+    "batch_size": 16,
+    "learning_rate": 0.001,
+    "num_epochs": 5,
+    "weight_decay": 0.0001,
+    "scheduler_step_size": 10,
+    "scheduler_gamma": 0.1,
+    "early_stopping_patience": 3,
+    "focal_loss_alpha": 0.25,
+    "focal_loss_gamma": 2.0
+  },
+  "data": {
+    "data_dir": "test_img/color",
+    "train_split": 0.7,
+    "val_split": 0.15,
+    "test_split": 0.15,
+    "augment_data": true,
+    "normalize": true
+  },
+  "detection": {
+    "landmark_method": "mediapipe",
+    "confidence_threshold": 0.7,
+    "blink_ear_threshold": 0.25,
+    "blink_consecutive_frames": 2,
+    "head_movement_threshold": 10.0
+  },
+  "challenge": {
+    "enable_challenges": true,
+    "blink_timeout": 10.0,
+    "head_movement_timeout": 15.0,
+    "sequence_timeout": 20.0,
+    "max_retries": 3
+  },
+  "web": {
+    "host": "0.0.0.0",
+    "port": 5000,
+    "debug": true,
+    "secret_key": "your-secret-key-here",
+    "database_url": "sqlite:///attendance.db"
+  },
+  "device": "auto",
+  "log_level": "INFO",
+  "save_predictions": true,
+  "model_save_path": "models/best_model.pth",
+  "logs_dir": "logs"
+}

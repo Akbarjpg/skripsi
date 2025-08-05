@@ -1,0 +1,53 @@
+{
+  "timestamp": "2025-08-02 16:45:07",
+  "landmark_detection": {
+    "original": {
+      "avg_processing_time_ms": 11.105232238769531,
+      "avg_fps": 90.0476440743756,
+      "min_time_ms": 4.494667053222656,
+      "max_time_ms": 19.82593536376953,
+      "std_time_ms": 2.8425088790457926,
+      "memory_growth_mb": 0.15234375,
+      "cache_size": 0
+    },
+    "optimized": {
+      "avg_processing_time_ms": 5.228052139282227,
+      "avg_fps": 191.2758276617518,
+      "min_time_ms": 0.0,
+      "max_time_ms": 16.976118087768555,
+      "std_time_ms": 5.731127672092618,
+      "memory_growth_mb": 0.0703125,
+      "cache_size": 0
+    },
+    "full_pipeline": {
+      "avg_processing_time_ms": 278.933846950531,
+      "avg_fps": 3.585079440636511,
+      "min_time_ms": 1.094818115234375,
+      "max_time_ms": 5420.6225872039795,
+      "std_time_ms": 1179.5984383774937,
+      "memory_growth_mb": 91.8984375,
+      "cache_size": 40
+    }
+  },
+  "cnn_models": {
+    "optimized_cnn": {
+      "avg_time": 0.005562119483947754,
+      "fps": 179.78757969619215,
+      "min_time": 0.0,
+      "max_time": 0.01644611358642578,
+      "parameters": 26770
+    },
+    "optimized_predictor": {
+      "avg_time": 0.00023411750793457032,
+      "fps": 4271.359322171982,
+      "min_time": 0.0,
+      "max_time": 0.003667593002319336,
+      "cache_hits": 0
+    }
+  },
+  "summary": {
+    "speed_improvement": 2.1241624878466108,
+    "fps_improvement": 2.1241624878466108,
+    "memory_improvement_percent": 53.84615384615385,
+    "targets_met": {
+      "fps_target_15": 

@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      🚀 Optimized Face Anti-Spoofing Detection - Real-time Performance
+    </title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+    <style>
+      body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      .container {
+        max-width: 1400px;
+        padding: 20px;
+      }
+
+      .main-title {
+        text-align: center;
+        color: white;
+        margin-bottom: 30px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      }
+
+      .card {
+        background: rgba(255, 255, 255, 0.95);
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        margin-bottom: 20px;
+      }
+
+      .video-container {
+        position: relative;
+        background: #000;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 20px;
+      }
+
+      #webcam {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      #overlay-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+
+      .performance-panel {
+        background: linear-gradient(45deg, #1e3c72, #2a5298);
+        color: white;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+      }
+
+      .metric-card {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 10px;
+        margin: 5px 0;
+        border-left: 4px solid;
+      }
+
+      .metric-landmark {
+        border-left-color: #28a745;
+      }
+      .metric-liveness {
+        border-left-color: #17a2b8;
+      }
+      .metric-cnn {
+        border-left-color: #ffc107;
+      }
+      .metric-security {
+        border-left-color: #dc3545;
+      }
+
+      .security-status {
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+        font-weight: bold;
+        margin: 10px 0;
+        transition: all 0.3s ease;
+      }
+
+      .security-secure {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        color: white;
+      }
+      .security-good {
+        background: linear-gradient(45deg, #007bff, #6610f2);
+        color: white;
+      }
+      .security-warning {
+        background: linear-gradient(45deg, #ffc107, #fd7e14);
+        color: black;
+      }
+      .security-danger {
+        background: linear-gradient(45deg, #dc3545, #e83e8c);
+        color: white;
+      }
+
+      .btn-optimized {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        border: none;
+        color: white;
+        border-radius: 25px;
+        padding: 10px 20px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+      }
+
+      .btn-optimized:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        color: white;
+      }
+
+      .performance-graph {
+        height: 100px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 5px;
+        margin: 10px 0;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .fps-indicator {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.7);
+        color: #00ff00;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-family: monospace;
+        font-weight: bold;
+        z-index: 10;
+      }
+
+      .method-status {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        margin: 5px 0;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+      }
+
+      .method-passed {
+        background: rgba(40, 167, 69, 0.1);
+        border-left: 4px solid #28a745;
+      }
+
+      .method-failed {
+        background: rgba(220, 53, 69, 0.1);
+        border-left: 4px solid #dc3545;
+      }
+
+      .score-bar {
+        width: 100%;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+        overflow: hidden;
+        margin: 5px 0;
+      }
+
+      .score-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.5s ease;
+      }
+
+      .landmark-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 10px 0;
+        font-size: 12px;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+
+      .real-time-stats {
+        font-family: monospace;
+        font-size: 11px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #00ff00;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 10px 0;
+        max-height: 150px;
+        overflow-y: auto;
+      }
+
+      /* Challenge Card Styles */
+      .challenge-instruction {
+        font-size: 18px;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 10px;
+        padding: 15px;
+        background: rgba(0, 123, 255, 0.1);
+        border-radius: 8px;
+        border-left: 4px solid #007bff;
+      }
+
+      .challenge-timer {
+        font-size: 14px;
+        color: #6c757d;
+      }
+
+      .progress {
+        height: 8px;
+      }
+
+      .challenge-card-success {
+        border-left: 4px solid #28a745 !important;
+      }
+
+      .challenge-card-success .challenge-instruction {
+        color: #28a745;
+        background: rgba(40, 167, 69, 0.1);
+        border-left-color: #28a745;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 10px;
+        }
+        .col-md-8,
+        .col-md-4 {
+          margin-bottom: 20px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1 class="main-title">
+        🚀 Optimized Face Anti-Spoofing Detection System
+      </h1>
+      <p class="text-center text-light mb-4">
+        <i class="fas fa-rocket"></i> High-Performance Real-time Processing |
+        <i class="fas fa-shield-alt"></i> Multi-Method Security |
+        <i class="fas fa-clock"></i> 15-20+ FPS Performance
+      </p>
+
+      <div class="row">
+        <!-- Video and Detection Panel -->
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="fas fa-video"></i> Real-time Video Processing
+              </h5>
+              <div class="fps-indicator" id="fpsIndicator">FPS: 0</div>
+            </div>
+            <div class="card-body p-3">
+              <!-- Video Container -->
+              <div class="video-container">
+                <video
+                  id="webcam"
+                  width="640"
+                  height="480"
+                  autoplay
+                  muted
+                ></video>
+                <canvas id="overlay-canvas" width="640" height="480"></canvas>
+              </div>
+
+              <!-- Landmark Legend -->
+              <div class="landmark-legend">
+                <div class="legend-item">
+                  <div class="legend-color" style="background: #ff0000"></div>
+                  <span>Eyes</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-color" style="background: #00ff00"></div>
+                  <span>Nose</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-color" style="background: #0000ff"></div>
+                  <span>Mouth</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-color" style="background: #ffffff"></div>
+                  <span>Face Outline</span>
+                </div>
+              </div>
+
+              <!-- Control Buttons -->
+              <div class="text-center">
+                <button
+                  class="btn btn-optimized me-2"
+                  onclick="startDetection()"
+                >
+                  <i class="fas fa-play"></i> Start Detection
+                </button>
+                <button
+                  class="btn btn-outline-secondary me-2"
+                  onclick="stopDetection()"
+                >
+                  <i class="fas fa-stop"></i> Stop
+                </button>
+                <button class="btn btn-outline-info" onclick="clearCache()">
+                  <i class="fas fa-broom"></i> Clear Cache
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Performance Monitor -->
+          <div class="card">
+            <div class="card-header">
+              <h6 class="mb-0">
+                <i class="fas fa-chart-line"></i> Real-time Performance Monitor
+              </h6>
+            </div>
+            <div class="card-body">
+              <div class="performance-graph" id="performanceGraph">
+                <canvas id="performanceCanvas" width="400" height="80"></canvas>
+              </div>
+              <div class="real-time-stats" id="realTimeStats">
+                System ready... Waiting for video stream...
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detection Results Panel -->
+        <div class="col-md-4">
+          <!-- Security Status -->
+          <div class="card">
+            <div class="card-header">
+              <h6 class="mb-0">
+                <i class="fas fa-shield-alt"></i> Security Assessment
+              </h6>
+            </div>
+            <div class="card-body">
+              <div class="security-status security-danger" id="securityStatus">
+                <i class="fas fa-clock"></i> Initializing...
+              </div>
+              <div id="securityDetails">
+                <small class="text-muted">Waiting for analysis...</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Challenge Instructions - NEW -->
+          <div class="card" id="challengeCard" style="display: none">
+            <div class="card-header">
+              <h6 class="mb-0">
+                <i class="fas fa-tasks"></i> Challenge Verification
+              </h6>
+            </div>
+            <div class="card-body text-center">
+              <div class="challenge-instruction" id="challengeInstruction">
+                <i class="fas fa-eye"></i> Please follow the instruction
+              </div>
+              <div class="progress mt-3 mb-2">
+                <div
+                  class="progress-bar progress-bar-striped progress-bar-animated"
+                  id="challengeProgress"
+                  style="width: 0%"
+                ></div>
+              </div>
+              <div class="challenge-timer" id="challengeTimer">
+                <small class="text-muted"
+                  >Time remaining: <span id="timeRemaining">--</span>s</small
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Method Status -->
+          <div class="card">
+            <div class="card-header">
+              <h6 class="mb-0">
+                <i class="fas fa-tasks"></i> Detection Methods (2/3 Required)
+              </h6>
+            </div>
+            <div class="card-body">
+              <!-- Landmark Detection -->
+              <div class="method-status method-failed" id="landmarkMethod">
+                <div>
+                  <strong>1. Landmark Detection</strong>
+                  <div>
+                    <small id="landmarkDetails">No landmarks detected</small>
+                  </div>
+                </div>
+                <div>
+                  <div class="score-bar">
+                    <div
+                      class="score-fill bg-success"
+                      id="landmarkScore"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                  <small id="landmarkScoreText">0%</small>
+                </div>
+              </div>
+
+              <!-- CNN Liveness -->
+              <div class="method-status method-failed" id="cnnMethod">
+                <div>
+                  <strong>2. CNN Liveness</strong>
+                  <div>
+                    <small id="cnnDetails">No analysis</small>
+                  </div>
+                </div>
+                <div>
+                  <div class="score-bar">
+                    <div
+                      class="score-fill bg-warning"
+                      id="cnnScore"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                  <small id="cnnScoreText">0%</small>
+                </div>
+              </div>
+
+              <!-- Movement Detection -->
+              <div class="method-status method-failed" id="movementMethod">
+                <div>
+                  <strong>3. Movement Detection</strong>
+                  <div>
+                    <small id="movementDetails">No movement</small>
+                  </div>
+                </div>
+                <div>
+                  <div class="score-bar">
+                    <div
+                      class="score-fill bg-info"
+                      id="movementScore"
+                      style="width: 0%"
+                    ></div>
+                  </div>
+                  <small id="movementScoreText">0%</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detailed Metrics -->
+          <div class="card">
+            <div class="card-header">
+              <h6 class="mb-0">
+                <i class="fas fa-analytics"></i> Detailed Metrics
+              </h6>
+            </div>
+            <div class="card-body">
+              <div class="metric-card metric-landmark">
+                <strong>Landmarks:</strong>
+                <span id="landmarkCount">0</span> points detected
+                <br />
+                <small>Blinks: <span id="blinkCount">0</span></small>
+              </div>
+
+              <div class="metric-card metric-liveness">
+                <strong>Liveness Score:</strong>
+                <span id="livenessScore">0</span>/100
+                <br />
+                <small>Status: <span id="livenessStatus">Unknown</span></small>
+              </div>
+
+              <div class="metric-card metric-cnn">
+                <strong>CNN Confidence:</strong>
+                <span id="cnnConfidence">0%</span>
+                <br />
+                <small
+                  >Live Probability: <span id="liveProbability">0%</span></small
+                >
+              </div>
+
+              <div class="metric-card metric-security">
+                <strong>Processing Time:</strong>
+                <span id="processingTime">0</span>ms
+                <br />
+                <small>Estimated FPS: <span id="estimatedFps">0</span></small>
+              </div>
+            </div>
+          </div>
+
+          <!-- System Information -->
+          <div class="card">
+            <div class="card-header">
+              <h6 class="mb-0">
+                <i class="fas fa-info-circle"></i> System Info
+              </h6>
+            </div>
+            <div class="card-body">
+              <small>
+                <div><strong>Frame Skip:</strong> Every 2nd frame</div>
+                <div><strong>Cache Duration:</strong> 100ms</div>
+                <div><strong>Input Size:</strong> 320x240 (optimized)</div>
+                <div><strong>Model:</strong> Lightweight CNN + MediaPipe</div>
+                <div>
+                  <strong>Status:</strong>
+                  <span id="systemStatus">Ready</span>
+                </div>
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      // Global variables
+      let socket = null;
+      let webcamStream = null;
+      let isDetecting = false;
+      let sessionId = "session_" + Date.now();
+      let performanceHistory = [];
+      let frameCount = 0;
+      let startTime = Date.now();
+
+      // Performance monitoring
+      let fpsCalculator = {
+        frames: 0,
+        lastTime: Date.now(),
+        fps: 0,
+        update: function () {
+          this.frames++;
+          const now = Date.now();
+          if (now - this.lastTime >= 1000) {
+            this.fps = Math.round((this.frames * 1000) / (now - this.lastTime));
+            this.frames = 0;
+            this.lastTime = now;
+            document.getElementById("fpsIndicator").textContent =
+              "FPS: " + this.fps;
+          }
+        },
+      };
+
+      // Initialize application
+      document.addEventListener("DOMContentLoaded", function () {
+        addSystemLog("🚀 Optimized Face Anti-Spoofing System loaded");
+        addSystemLog("⚡ Performance optimizations active");
+        addSystemLog("🎯 Multi-method security enabled");
+        initializeSocket();
+      });
+
+      function initializeSocket() {
+        try {
+          socket = io();
+
+          socket.on("connect", function () {
+            addSystemLog("✅ Connected to optimized server");
+            document.getElementById("systemStatus").textContent = "Connected";
+          });
+
+          socket.on("disconnect", function () {
+            addSystemLog("❌ Disconnected from server");
+            document.getElementById("systemStatus").textContent =
+              "Disconnected";
+          });
+
+          socket.on("landmark_result", handleOptimizedResults);
+          socket.on("performance_stats", handlePerformanceStats);
+          socket.on("error", function (data) {
+            addSystemLog("⚠️ Error: " + data.message);
+          });
+
+          addSystemLog("🔌 Socket.IO initialized");
+        } catch (error) {
+          addSystemLog("❌ Socket initialization failed: " + error.message);
+        }
+      }
+
+      function handleOptimizedResults(data) {
+        try {
+          // Update FPS calculator
+          fpsCalculator.update();
+
+          // Update security status
+          updateSecurityStatus(data);
+
+          // Update method statuses
+          updateMethodStatuses(data);
+
+          // Update detailed metrics
+          updateDetailedMetrics(data);
+
+          // Update landmark visualization
+          updateLandmarkVisualization(data);
+
+          // Update performance tracking
+          updatePerformanceTracking(data);
+
+          // Log processing info
+          const processingTime = data.processing_time
+            ? (data.processing_time * 1000).toFixed(1)
+            : "N/A";
+          const cacheInfo = data.from_cache ? " (cached)" : "";
+          const skipInfo = data.frame_skipped ? " (skipped)" : "";
+
+          addSystemLog(
+            `📊 Frame processed: ${processingTime}ms${cacheInfo}${skipInfo}`
+          );
+
+          if (data.estimated_fps) {
+            addSystemLog(`⚡ Est. FPS: ${data.estimated_fps.toFixed(1)}`);
+          }
+        } catch (error) {
+          addSystemLog("⚠️ Result handling error: " + error.message);
+        }
+      }
+
+      function updateSecurityStatus(data) {
+        const statusElement = document.getElementById("securityStatus");
+        const detailsElement = document.getElementById("securityDetails");
+
+        const level = data.security_level || "UNKNOWN";
+        const confidence = ((data.overall_confidence || 0) * 100).toFixed(1);
+        const methodsPassed = data.methods_passed || 0;
+
+        // Update status appearance
+        statusElement.className = `security-status security-${level.toLowerCase()}`;
+
+        // Update status text
+        let icon = "🔒";
+        let statusText = "";
+        switch (level) {
+          case "SECURE":
+            icon = "🛡️";
+            statusText = `SECURE (${confidence}%)`;
+            break;
+          case "GOOD":
+            icon = "✅";
+            statusText = `GOOD (${confidence}%)`;
+            break;
+          case "WARNING":
+            icon = "⚠️";
+            statusText = `WARNING (${confidence}%)`;
+            break;
+          case "DANGER":
+            icon = "🚫";
+            statusText = `DANGER (${confidence}%)`;
+            break;
+          default:
+            icon = "❓";
+            statusText = "ANALYZING...";
+        }
+
+        statusElement.innerHTML = `${icon} ${statusText}`;
+
+        // Update details
+        detailsElement.innerHTML = `
+                <small class="text-muted">
+                    ${methodsPassed}/3 methods passed<br>
+                    ${data.message || "Security analysis complete"}
+                </small>
+            `;
+      }
+
+      function updateMethodStatuses(data) {
+        const methodDetails = data.method_details || {};
+
+        // Enhanced Landmark Detection with Challenge
+        const landmarkVerified = data.landmark_verified || false;
+        const landmarkStatus = landmarkVerified ? 'VERIFIED' : 'CHALLENGE_ACTIVE';
+        updateMethodStatus(
+          "landmark",
+          {
+            verified: landmarkVerified,
+            score: methodDetails.landmark?.score || 0,
+            status: landmarkStatus
+          },
+          methodDetails.landmark?.description || `${data.landmark_count || 0} landmarks detected`
+        );
+
+        // Enhanced CNN Detection with Persistence
+        const cnnVerified = data.cnn_verified || false;
+        updateMethodStatus(
+          "cnn",
+          {
+            verified: cnnVerified,
+            score: methodDetails.cnn?.score || 0,
+            status: cnnVerified ? 'VERIFIED' : 'CHECKING'
+          },
+          methodDetails.cnn?.description || `CNN confidence: ${((data.cnn_confidence || 0) * 100).toFixed(1)}%`
+        );
+
+        // Enhanced Movement Detection with Grace Period
+        const movementVerified = data.movement_verified || false;
+        updateMethodStatus(
+          "movement",
+          {
+            verified: movementVerified,
+            score: methodDetails.movement?.score || 0,
+            status: movementVerified ? 'VERIFIED' : 'CHECKING'
+          },
+          methodDetails.movement?.description || 'Movement with 3s grace period'
+        );
+
+        // Update Challenge Card
+        updateChallengeCard(data);
+      }
+
+      function updateChallengeCard(data) {
+        const challengeCard = document.getElementById("challengeCard");
+        const challengeInstruction = document.getElementById("challengeInstruction");
+        const challengeProgress = document.getElementById("challengeProgress");
+        const timeRemaining = document.getElementById("timeRemaining");
+
+        const challengeInfo = data.challenge_info;
+        const landmarkVerified = data.landmark_verified || false;
+
+        if (landmarkVerified) {
+          // Hide challenge card when landmark is verified
+          challengeCard.style.display = "none";
+        } else if (challengeInfo) {
+          // Show challenge card with instructions
+          challengeCard.style.display = "block";
+
+          // Update instruction
+          challengeInstruction.innerHTML = `<i class="fas fa-bullseye"></i> ${challengeInfo.instruction}`;
+
+          // Update progress
+          const progress = (challengeInfo.progress || 0) * 100;
+          challengeProgress.style.width = `${progress}%`;
+          challengeProgress.className = progress > 50 ?
+            "progress-bar progress-bar-striped progress-bar-animated bg-success" :
+            "progress-bar progress-bar-striped progress-bar-animated bg-primary";
+
+          // Update timer
+          const timeLeft = Math.ceil(challengeInfo.time_remaining || 0);
+          timeRemaining.textContent = timeLeft;
+
+          // Change card style based on progress
+          if (progress >= 100) {
+            challengeCard.className = "card challenge-card-success";
+          } else {
+            challengeCard.className = "card";
+          }
+        } else {
+          // Hide challenge card if no challenge info
+          challengeCard.style.display = "none";
+        }
+      }
+
+        // CNN Liveness
+        updateMethodStatus(
+          "cnn",
+          methodDetails.cnn,
+          `Confidence: ${((data.cnn_confidence || 0) * 100).toFixed(1)}%`
+        );
+
+        // Movement Detection
+        const movementDesc = [];
+        if (data.blink_count > 0)
+          movementDesc.push(`${data.blink_count} blinks`);
+        if (data.head_movement) movementDesc.push("head movement");
+        if (data.mouth_open) movementDesc.push("mouth activity");
+
+        updateMethodStatus(
+          "movement",
+          methodDetails.movement,
+          movementDesc.length > 0
+            ? movementDesc.join(", ")
+            : "No movement detected"
+        );
+      }
+
+      function updateMethodStatus(methodName, methodData, description) {
+        const methodElement = document.getElementById(`${methodName}Method`);
+        const scoreElement = document.getElementById(`${methodName}Score`);
+        const scoreTextElement = document.getElementById(
+          `${methodName}ScoreText`
+        );
+        const detailsElement = document.getElementById(`${methodName}Details`);
+
+        if (methodData) {
+          // Use 'verified' field for new system, fall back to 'passed' for compatibility
+          const verified = methodData.verified !== undefined ? methodData.verified : methodData.passed || false;
+          const score = (methodData.score || 0) * 100;
+
+          // Update status with enhanced visual feedback
+          methodElement.className = `method-status ${
+            verified ? "method-passed" : "method-failed"
+          }`;
+
+          // Update score bar with appropriate color
+          let scoreColor = "bg-danger";
+          if (verified) {
+            scoreColor = "bg-success";
+          } else if (score > 50) {
+            scoreColor = "bg-warning";
+          }
+
+          scoreElement.className = `score-fill ${scoreColor}`;
+          scoreElement.style.width = `${score}%`;
+          scoreTextElement.textContent = `${score.toFixed(1)}%`;
+
+          // Enhanced details with status
+          const status = methodData.status || (verified ? 'VERIFIED' : 'CHECKING');
+          detailsElement.innerHTML = `
+            <span class="${verified ? 'text-success' : 'text-muted'}">${description}</span><br>
+            <small class="text-muted">Status: ${status}</small>
+          `;
+        }
+      }
+
+      function updateDetailedMetrics(data) {
+        // Landmark metrics
+        document.getElementById("landmarkCount").textContent =
+          data.landmark_count || 0;
+        document.getElementById("blinkCount").textContent =
+          data.blink_count || 0;
+
+        // Liveness metrics
+        document.getElementById("livenessScore").textContent =
+          data.liveness_raw_score ? data.liveness_raw_score.toFixed(1) : 0;
+        document.getElementById("livenessStatus").textContent =
+          data.liveness_status || "Unknown";
+
+        // CNN metrics
+        document.getElementById("cnnConfidence").textContent =
+          ((data.cnn_confidence || 0) * 100).toFixed(1) + "%";
+
+        const liveProbability = data.cnn_probabilities
+          ? (data.cnn_probabilities.live * 100).toFixed(1)
+          : "0";
+        document.getElementById("liveProbability").textContent =
+          liveProbability + "%";
+
+        // Performance metrics
+        const processingTime = data.processing_time
+          ? (data.processing_time * 1000).toFixed(1)
+          : "0";
+        document.getElementById("processingTime").textContent = processingTime;
+
+        const estimatedFps = data.estimated_fps
+          ? data.estimated_fps.toFixed(1)
+          : "0";
+        document.getElementById("estimatedFps").textContent = estimatedFps;
+      }
+
+      function updateLandmarkVisualization(data) {
+        const canvas = document.getElementById("overlay-canvas");
+        const ctx = canvas.getContext("2d");
+
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw landmarks if available
+        if (data.landmarks && data.landmarks.length > 0) {
+          data.landmarks.forEach((landmark) => {
+            const x = landmark.x * canvas.width;
+            const y = landmark.y * canvas.height;
+
+            ctx.fillStyle = landmark.color || "#FFFFFF";
+            ctx.beginPath();
+            ctx.arc(x, y, 2, 0, 2 * Math.PI);
+            ctx.fill();
+          });
+
+          // Draw connection lines for face outline (simplified)
+          if (data.landmarks.length > 10) {
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+
+            // Connect first few landmarks to show face outline
+            for (let i = 0; i < Math.min(10, data.landmarks.length - 1); i++) {
+              const current = data.landmarks[i];
+              const next = data.landmarks[i + 1];
+
+              if (i === 0) {
+                ctx.moveTo(current.x * canvas.width, current.y * canvas.height);
+              }
+              ctx.lineTo(next.x * canvas.width, next.y * canvas.height);
+            }
+            ctx.stroke();
+          }
+        }
+
+        // Draw performance overlay
+        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+        ctx.fillRect(10, 10, 200, 80);
+
+        ctx.fillStyle = "#00FF00";
+        ctx.font = "12px monospace";
+        ctx.fillText(`FPS: ${fpsCalculator.fps}`, 20, 30);
+        ctx.fillText(
+          `Processing: ${
+            data.processing_time
+              ? (data.processing_time * 1000).toFixed(1)
+              : "0"
+          }ms`,
+          20,
+          45
+        );
+        ctx.fillText(`Security: ${data.security_level || "N/A"}`, 20, 60);
+        ctx.fillText(`Methods: ${data.methods_passed || 0}/3`, 20, 75);
+      }
+
+      function updatePerformanceTracking(data) {
+        if (data.processing_time) {
+          performanceHistory.push(data.processing_time * 1000);
+          if (performanceHistory.length > 50) {
+            performanceHistory.shift();
+          }
+
+          // Update performance graph
+          drawPerformanceGraph();
+        }
+      }
+
+      function drawPerformanceGraph() {
+        const canvas = document.getElementById("performanceCanvas");
+        const ctx = canvas.getContext("2d");
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        if (performanceHistory.length < 2) return;
+
+        const maxTime = Math.max(...performanceHistory, 50); // Min 50ms scale
+        const width = canvas.width;
+        const height = canvas.height;
+
+        // Draw grid
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 5; i++) {
+          const y = (i / 5) * height;
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(width, y);
+          ctx.stroke();
+        }
+
+        // Draw performance line
+        ctx.strokeStyle = "#00FF00";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+
+        performanceHistory.forEach((time, index) => {
+          const x = (index / (performanceHistory.length - 1)) * width;
+          const y = height - (time / maxTime) * height;
+
+          if (index === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        });
+
+        ctx.stroke();
+
+        // Draw scale labels
+        ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+        ctx.font = "10px monospace";
+        ctx.fillText("0ms", 5, height - 5);
+        ctx.fillText(`${maxTime.toFixed(0)}ms`, 5, 15);
+      }
+
+      function handlePerformanceStats(stats) {
+        addSystemLog(
+          `📈 Avg: ${(stats.avg_processing_time * 1000).toFixed(1)}ms, Cache: ${
+            stats.cache_size
+          }`
+        );
+      }
+
+      async function startDetection() {
+        try {
+          addSystemLog("🎬 Starting webcam...");
+
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              width: { ideal: 640 },
+              height: { ideal: 480 },
+              frameRate: { ideal: 30 },
+            },
+          });
+
+          const video = document.getElementById("webcam");
+          video.srcObject = stream;
+          webcamStream = stream;
+
+          video.onloadedmetadata = () => {
+            video.play();
+            isDetecting = true;
+            startTime = Date.now();
+            addSystemLog("✅ Detection started - optimized processing active");
+            processFrames();
+          };
+        } catch (error) {
+          addSystemLog("❌ Camera access failed: " + error.message);
+        }
+      }
+
+      function stopDetection() {
+        isDetecting = false;
+
+        if (webcamStream) {
+          webcamStream.getTracks().forEach((track) => track.stop());
+          webcamStream = null;
+        }
+
+        const video = document.getElementById("webcam");
+        video.srcObject = null;
+
+        addSystemLog("⏹️ Detection stopped");
+        document.getElementById("systemStatus").textContent = "Stopped";
+      }
+
+      function processFrames() {
+        if (!isDetecting) return;
+
+        const video = document.getElementById("webcam");
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convert to base64
+        const imageData = canvas.toDataURL("image/jpeg", 0.8);
+
+        // Send to server
+        if (socket && socket.connected) {
+          socket.emit("process_frame", {
+            image: imageData,
+            session_id: sessionId,
+            timestamp: Date.now(),
+          });
+        }
+
+        // Continue processing
+        setTimeout(processFrames, 100); // 10 FPS processing rate
+      }
+
+      function clearCache() {
+        fetch("/api/cleanup-cache")
+          .then((response) => response.json())
+          .then((data) => {
+            addSystemLog("🧹 Cache cleared: " + data.status);
+          })
+          .catch((error) => {
+            addSystemLog("⚠️ Cache clear failed: " + error.message);
+          });
+      }
+
+      function addSystemLog(message) {
+        const logElement = document.getElementById("realTimeStats");
+        const timestamp = new Date().toLocaleTimeString();
+        const logLine = `[${timestamp}] ${message}\n`;
+
+        logElement.textContent = logLine + logElement.textContent;
+
+        // Keep only last 20 lines
+        const lines = logElement.textContent.split("\n");
+        if (lines.length > 20) {
+          logElement.textContent = lines.slice(0, 20).join("\n");
+        }
+
+        // Auto-scroll to top
+        logElement.scrollTop = 0;
+      }
+
+      // Cleanup on page unload
+      window.addEventListener("beforeunload", function () {
+        if (isDetecting) {
+          stopDetection();
+        }
+        if (socket) {
+          socket.disconnect();
+        }
+      });
+    </script>
+  </body>
+</html>

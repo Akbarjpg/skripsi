@@ -1,0 +1,11 @@
+2025-07-21 13:56:38 | src.utils.logger | [32mINFO[0m | Logging system initialized
+2025-07-21 13:56:38 | src.utils.logger | DEBUG | Log level: INFO
+2025-07-21 13:56:38 | src.utils.logger | DEBUG | Log file: logs\app_20250721_135638.log
+2025-07-21 13:56:38 | __main__ | [32mINFO[0m | ============================================================
+2025-07-21 13:56:38 | __main__ | [32mINFO[0m | FACE ANTI-SPOOFING ATTENDANCE SYSTEM
+2025-07-21 13:56:38 | __main__ | [32mINFO[0m | ============================================================
+2025-07-21 13:56:38 | __main__ | [32mINFO[0m | Mode: web
+2025-07-21 13:56:38 | __main__ | [32mINFO[0m | Config: config/default.json
+2025-07-21 13:56:38 | __main__ | [32mINFO[0m | Debug: False
+2025-07-21 13:56:38 | src.utils.config | [33mWARNING[0m | Failed to load config from D:\Codingan\skripsi\dari nol\config\default.json: ModelConfig.__init__() got an unexpected keyword argument 'save_path'
+2025-07-21 13:56:38 | src.utils.config | [32mINFO[0m | Using default configuration

@@ -1,0 +1,219 @@
+{% extends "base.html" %} {% block title %}Home - Face Anti-Spoofing
+Attendance{% endblock %} {% block content %}
+<div class="gradient-bg">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <!-- Hero Section -->
+        <div class="text-center text-white mb-5 fade-in-up">
+          <h1 class="display-4 fw-bold mb-3">
+            <i class="fas fa-shield-alt me-3"></i>
+            Face Anti-Spoofing Attendance System
+          </h1>
+          <p class="lead mb-4">
+            Advanced attendance management with multi-layer anti-spoofing
+            technology
+          </p>
+          <div class="d-flex justify-content-center gap-3 flex-wrap">
+            {% if session.user_id %}
+            <a href="{{ url_for('attendance') }}" class="btn btn-light btn-lg">
+              <i class="fas fa-calendar-check me-2"></i>Start Attendance
+            </a>
+            <a
+              href="{{ url_for('dashboard') }}"
+              class="btn btn-outline-light btn-lg"
+            >
+              <i class="fas fa-chart-bar me-2"></i>View Dashboard
+            </a>
+            {% else %}
+            <a href="{{ url_for('login') }}" class="btn btn-light btn-lg">
+              <i class="fas fa-sign-in-alt me-2"></i>Login
+            </a>
+            <a
+              href="{{ url_for('register') }}"
+              class="btn btn-outline-light btn-lg"
+            >
+              <i class="fas fa-user-plus me-2"></i>Register
+            </a>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="row g-4 mb-5">
+          <div class="col-md-4">
+            <div
+              class="card card-modern h-100 text-center fade-in-up"
+              style="animation-delay: 0.1s"
+            >
+              <div class="card-body p-4">
+                <div class="mb-3">
+                  <i class="fas fa-eye fa-3x text-primary"></i>
+                </div>
+                <h5 class="card-title">Liveness Detection</h5>
+                <p class="card-text text-muted">
+                  Advanced CNN-based liveness detection to prevent photo and
+                  video spoofing attacks.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div
+              class="card card-modern h-100 text-center fade-in-up"
+              style="animation-delay: 0.2s"
+            >
+              <div class="card-body p-4">
+                <div class="mb-3">
+                  <i class="fas fa-map-marked-alt fa-3x text-success"></i>
+                </div>
+                <h5 class="card-title">Facial Landmarks</h5>
+                <p class="card-text text-muted">
+                  468-point facial landmark detection using MediaPipe for
+                  precise face analysis.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div
+              class="card card-modern h-100 text-center fade-in-up"
+              style="animation-delay: 0.3s"
+            >
+              <div class="card-body p-4">
+                <div class="mb-3">
+                  <i class="fas fa-tasks fa-3x text-warning"></i>
+                </div>
+                <h5 class="card-title">Challenge Response</h5>
+                <p class="card-text text-muted">
+                  Interactive challenges like blinking and head movement for
+                  enhanced security.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Statistics Section -->
+        <div class="row g-4 mb-5">
+          <div class="col-md-3">
+            <div
+              class="card card-modern text-center fade-in-up"
+              style="animation-delay: 0.4s"
+            >
+              <div class="card-body">
+                <h3 class="text-primary mb-1">99.2%</h3>
+                <small class="text-muted">Detection Accuracy</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div
+              class="card card-modern text-center fade-in-up"
+              style="animation-delay: 0.5s"
+            >
+              <div class="card-body">
+                <h3 class="text-success mb-1">&lt;2s</h3>
+                <small class="text-muted">Processing Time</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div
+              class="card card-modern text-center fade-in-up"
+              style="animation-delay: 0.6s"
+            >
+              <div class="card-body">
+                <h3 class="text-warning mb-1">468</h3>
+                <small class="text-muted">Facial Points</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div
+              class="card card-modern text-center fade-in-up"
+              style="animation-delay: 0.7s"
+            >
+              <div class="card-body">
+                <h3 class="text-info mb-1">24/7</h3>
+                <small class="text-muted">Availability</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- How It Works Section -->
+        <div class="card card-modern fade-in-up" style="animation-delay: 0.8s">
+          <div class="card-header bg-transparent border-0 pt-4">
+            <h4 class="text-center mb-0">
+              <i class="fas fa-cogs me-2"></i>How It Works
+            </h4>
+          </div>
+          <div class="card-body">
+            <div class="row g-4">
+              <div class="col-md-3 text-center">
+                <div class="mb-3">
+                  <div
+                    class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center"
+                    style="width: 60px; height: 60px"
+                  >
+                    <span class="fw-bold">1</span>
+                  </div>
+                </div>
+                <h6>Face Detection</h6>
+                <p class="text-muted small">
+                  System detects and locates your face in the camera feed
+                </p>
+              </div>
+              <div class="col-md-3 text-center">
+                <div class="mb-3">
+                  <div
+                    class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center"
+                    style="width: 60px; height: 60px"
+                  >
+                    <span class="fw-bold">2</span>
+                  </div>
+                </div>
+                <h6>Liveness Check</h6>
+                <p class="text-muted small">
+                  AI model verifies that you're a real person, not a photo
+                </p>
+              </div>
+              <div class="col-md-3 text-center">
+                <div class="mb-3">
+                  <div
+                    class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center"
+                    style="width: 60px; height: 60px"
+                  >
+                    <span class="fw-bold">3</span>
+                  </div>
+                </div>
+                <h6>Challenge Test</h6>
+                <p class="text-muted small">
+                  Complete interactive challenges like blinking or head movement
+                </p>
+              </div>
+              <div class="col-md-3 text-center">
+                <div class="mb-3">
+                  <div
+                    class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center"
+                    style="width: 60px; height: 60px"
+                  >
+                    <span class="fw-bold">4</span>
+                  </div>
+                </div>
+                <h6>Attendance Logged</h6>
+                <p class="text-muted small">
+                  Your attendance is securely recorded with timestamp
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

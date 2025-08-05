@@ -1,0 +1,21 @@
+# Minimal Requirements - Core Functionality Only
+# This file contains only essential packages for basic operation
+
+# Deep Learning (CPU-only version for lighter installation)
+torch>=2.0.0 --index-url https://download.pytorch.org/whl/cpu
+
+# Computer Vision & Face Detection
+opencv-python>=4.8.0
+mediapipe>=0.10.0
+
+# Core Dependencies
+numpy>=1.24.0
+Pillow>=10.0.0
+
+# Web Framework
+flask>=2.3.0
+flask-socketio>=5.3.0
+werkzeug>=2.3.0
+
+# Utilities
+tqdm>=4.65.0

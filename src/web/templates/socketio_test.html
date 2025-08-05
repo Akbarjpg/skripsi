@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Socket.IO Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+      }
+      .status {
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 5px;
+      }
+      .connected {
+        background-color: #d4edda;
+        color: #155724;
+      }
+      .disconnected {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+      .message {
+        background-color: #d1ecf1;
+        color: #0c5460;
+      }
+      button {
+        padding: 10px 20px;
+        margin: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Socket.IO Connection Test</h1>
+
+    <div id="status" class="status disconnected">Connecting...</div>
+
+    <div>
+      <button onclick="testConnection()">Test Connection</button>
+      <button onclick="sendTestFrame()">Send Test Frame</button>
+    </div>
+
+    <div id="messages" style="margin-top: 20px">
+      <h3>Messages:</h3>
+      <div id="messageList"></div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script>
+      const statusDiv = document.getElementById("status");
+      const messageList = document.getElementById("messageList");
+
+      function addMessage(message, type = "info") {
+        const div = document.createElement("div");
+        div.className = "status message";
+        div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        messageList.appendChild(div);
+      }
+
+      // Initialize Socket.IO connection
+      const socket = io();
+
+      socket.on("connect", () => {
+        statusDiv.textContent = "Connected to server";
+        statusDiv.className = "status connected";
+        addMessage("Socket.IO connected successfully!");
+      });
+
+      socket.on("disconnect", () => {
+        statusDiv.textContent = "Disconnected from server";
+        statusDiv.className = "status disconnected";
+        addMessage("Socket.IO disconnected");
+      });
+
+      socket.on("status", (data) => {
+        addMessage(`Server status: ${data.message}`);
+      });
+
+      socket.on("verification_results", (data) => {
+        addMessage(`Verification results: ${JSON.stringify(data)}`);
+      });
+
+      socket.on("error", (data) => {
+        addMessage(`Error: ${data.message}`, "error");
+      });
+
+      function testConnection() {
+        addMessage("Testing connection...");
+        socket.emit("test_event", { message: "Hello from client" });
+      }
+
+      function sendTestFrame() {
+        addMessage("Sending test frame...");
+        // Create a simple test image data (1x1 pixel base64 image)
+        const testImage =
+          "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==";
+
+        socket.emit("process_frame", {
+          image: testImage,
+          session_id: "test_session_123",
+        });
+      }
+    </script>
+  </body>
+</html>

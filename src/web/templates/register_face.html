@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daftarkan Wajah - Sistem Absensi</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    <style>
+      .face-registration-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .position-card {
+        border: 2px solid #e9ecef;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+      }
+
+      .position-card.active {
+        border-color: #007bff;
+        box-shadow: 0 0 15px rgba(0, 123, 255, 0.3);
+      }
+
+      .position-card.completed {
+        border-color: #28a745;
+        background-color: #f8fff9;
+      }
+
+      .camera-container {
+        position: relative;
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+        border-radius: 15px;
+        overflow: hidden;
+        background-color: #f8f9fa;
+      }
+
+      #video {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      .camera-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border: 3px dashed #007bff;
+        border-radius: 15px;
+        pointer-events: none;
+      }
+
+      .face-guide {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 200px;
+        height: 250px;
+        border: 2px solid #28a745;
+        border-radius: 50%;
+        pointer-events: none;
+        opacity: 0.7;
+      }
+
+      .progress-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 30px;
+        padding: 0 20px;
+      }
+
+      .progress-step {
+        flex: 1;
+        text-align: center;
+        position: relative;
+      }
+
+      .progress-step:not(:last-child)::after {
+        content: "";
+        position: absolute;
+        top: 15px;
+        right: -50%;
+        width: 100%;
+        height: 2px;
+        background-color: #e9ecef;
+        z-index: 1;
+      }
+
+      .progress-step.completed:not(:last-child)::after {
+        background-color: #28a745;
+      }
+
+      .progress-circle {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        color: #6c757d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 5px;
+        position: relative;
+        z-index: 2;
+        font-weight: bold;
+      }
+
+      .progress-step.active .progress-circle {
+        background-color: #007bff;
+        color: white;
+      }
+
+      .progress-step.completed .progress-circle {
+        background-color: #28a745;
+        color: white;
+      }
+
+      .instruction-text {
+        font-size: 1.1em;
+        color: #495057;
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      .alert-custom {
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+
+      .btn-capture {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        border: none;
+        border-radius: 25px;
+        padding: 12px 30px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+      }
+
+      .btn-capture:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+      }
+
+      .btn-capture:disabled {
+        background: #6c757d;
+        transform: none;
+        box-shadow: none;
+      }
+
+      .countdown-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #28a745, #20c997);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px auto;
+        animation: pulse 1s infinite;
+      }
+
+      .countdown-circle span {
+        color: white;
+        font-size: 2rem;
+        font-weight: bold;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.1);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .face-detected {
+        border-color: #28a745 !important;
+        background-color: #d4edda !important;
+      }
+
+      .face-not-detected {
+        border-color: #dc3545 !important;
+        background-color: #f8d7da !important;
+      }
+
+      .face-positioned {
+        border-color: #ffc107 !important;
+        background-color: #fff3cd !important;
+      }
+
+      .completion-section {
+        text-align: center;
+        padding: 40px 20px;
+        background: linear-gradient(135deg, #28a745, #20c997);
+        border-radius: 15px;
+        color: white;
+        margin-top: 30px;
+      }
+
+      .loading-spinner {
+        display: none;
+        text-align: center;
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body class="bg-light">
+    <div class="container-fluid">
+      <div class="face-registration-container">
+        <!-- Header -->
+        <div class="text-center mb-4">
+          <h2 class="text-primary mb-3">
+            <i class="fas fa-user-plus me-2"></i>
+            Pendaftaran Wajah
+          </h2>
+          <p class="text-muted">
+            Daftarkan wajah Anda untuk sistem absensi dengan mengambil foto dari
+            3 posisi
+          </p>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="progress-indicator">
+          <div class="progress-step active" id="step-front">
+            <div class="progress-circle">1</div>
+            <small>Depan</small>
+          </div>
+          <div class="progress-step" id="step-left">
+            <div class="progress-circle">2</div>
+            <small>Kiri</small>
+          </div>
+          <div class="progress-step" id="step-right">
+            <div class="progress-circle">3</div>
+            <small>Kanan</small>
+          </div>
+        </div>
+
+        <!-- Alert Area -->
+        <div id="alert-area"></div>
+
+        <!-- Camera Section -->
+        <div class="position-card active" id="camera-section">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="camera-container">
+                <video id="video" autoplay playsinline></video>
+                <div class="camera-overlay"></div>
+                <div class="face-guide"></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="instruction-text" id="instruction-text">
+                Posisikan wajah Anda menghadap kamera dan pastikan wajah
+                terlihat jelas dalam lingkaran panduan
+              </div>
+
+              <div class="text-center">
+                <div id="face-status" class="mb-3">
+                  <div class="alert alert-info" id="status-message">
+                    <i class="fas fa-search me-2"></i>Mencari wajah...
+                  </div>
+                </div>
+                <div
+                  id="countdown-display"
+                  class="countdown-circle"
+                  style="display: none"
+                >
+                  <span id="countdown-number">3</span>
+                </div>
+                <button
+                  class="btn btn-capture btn-secondary btn-lg"
+                  id="capture-btn"
+                  disabled
+                  style="display: none"
+                >
+                  <i class="fas fa-camera me-2"></i>
+                  Mengambil Foto...
+                </button>
+              </div>
+
+              <div class="mt-3">
+                <h6>Tips untuk foto yang baik:</h6>
+                <ul class="list-unstyled">
+                  <li>
+                    <i class="fas fa-check text-success me-2"></i>Pastikan
+                    pencahayaan cukup
+                  </li>
+                  <li>
+                    <i class="fas fa-check text-success me-2"></i>Lepas kacamata
+                    dan masker
+                  </li>
+                  <li>
+                    <i class="fas fa-check text-success me-2"></i>Wajah
+                    menghadap kamera
+                  </li>
+                  <li>
+                    <i class="fas fa-check text-success me-2"></i>Ekspresi
+                    netral
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading Section -->
+        <div class="loading-spinner" id="loading-section">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Memproses...</span>
+          </div>
+          <p class="mt-2">Memproses gambar...</p>
+        </div>
+
+        <!-- Completion Section -->
+        <div class="completion-section d-none" id="completion-section">
+          <div class="mb-4">
+            <i class="fas fa-check-circle fa-4x"></i>
+          </div>
+          <h3>Pendaftaran Wajah Berhasil!</h3>
+          <p class="mb-4">
+            Semua posisi wajah telah berhasil didaftarkan. Anda sekarang dapat
+            menggunakan sistem absensi.
+          </p>
+          <a href="/dashboard" class="btn btn-light btn-lg">
+            <i class="fas fa-home me-2"></i>
+            Kembali ke Dashboard
+          </a>
+        </div>
+
+        <!-- Navigation -->
+        <div class="text-center mt-4" id="navigation-section">
+          <a href="/dashboard" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>
+            Kembali ke Dashboard
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      class FaceRegistration {
+          constructor() {
+              console.log('🚀 Initializing Face Registration System...');
+
+              // Initialize SocketIO with debugging
+              this.socket = io();
+              this.setupSocketDebug();
+
+              this.video = document.getElementById('video');
+              this.captureBtn = document.getElementById('capture-btn');
+              this.alertArea = document.getElementById('alert-area');
+              this.statusMessage = document.getElementById('status-message');
+              this.countdownDisplay = document.getElementById('countdown-display');
+              this.countdownNumber = document.getElementById('countdown-number');
+              this.currentPosition = 'front';
+              this.completedPositions = [];
+              this.userId = {{ user.id }};
+
+              // Face detection properties
+              this.canvas = document.createElement('canvas');
+              this.context = this.canvas.getContext('2d');
+              this.detectionInterval = null;
+              this.countdownTimer = null;
+              this.faceDetected = false;
+              this.stableFrames = 0;
+              this.requiredStableFrames = 10; // Need 10 stable frames before countdown
+              this.isCountingDown = false;
+              this.isCaptureInProgress = false;
+
+              this.positions = {
+                  'front': {
+                      name: 'Depan',
+                      instruction: 'Posisikan wajah Anda menghadap kamera dan pastikan wajah terlihat jelas dalam lingkaran panduan',
+                      buttonText: 'Ambil Foto Depan'
+                  },
+                  'left': {
+                      name: 'Kiri',
+                      instruction: 'Putar kepala Anda ke kiri (45 derajat) sambil tetap melihat ke kamera',
+                      buttonText: 'Ambil Foto Kiri'
+                  },
+                  'right': {
+                      name: 'Kanan',
+                      instruction: 'Putar kepala Anda ke kanan (45 derajat) sambil tetap melihat ke kamera',
+                      buttonText: 'Ambil Foto Kanan'
+                  }
+              };
+
+              this.init();
+          }
+
+          setupSocketDebug() {
+              console.log('🔌 Setting up SocketIO debugging...');
+
+              this.socket.on('connect', () => {
+                  console.log('✅ SocketIO connected successfully');
+                  console.log('🆔 Socket ID:', this.socket.id);
+              });
+
+              this.socket.on('disconnect', (reason) => {
+                  console.log('❌ SocketIO disconnected:', reason);
+              });
+
+              this.socket.on('connect_error', (error) => {
+                  console.error('💥 SocketIO connection error:', error);
+              });
+
+              this.socket.on('face_capture_result', (data) => {
+                  console.log('📨 Received face_capture_result event:', data);
+                  this.handleCaptureResult(data);
+              });
+          }
+
+          async init() {
+              console.log('⚙️ Initializing camera and face detection...');
+
+              try {
+                  // Initialize camera
+                  const stream = await navigator.mediaDevices.getUserMedia({
+                      video: {
+                          width: { ideal: 640 },
+                          height: { ideal: 480 },
+                          facingMode: 'user'
+                      }
+                  });
+                  this.video.srcObject = stream;
+                  console.log('📹 Camera initialized successfully');
+
+                  // Wait for video to load
+                  this.video.addEventListener('loadedmetadata', () => {
+                      console.log('📹 Video metadata loaded, starting face detection');
+                      this.startFaceDetection();
+                  });
+
+                  console.log('✅ Face registration system initialized');
+
+              } catch (error) {
+                  this.showAlert('error', 'Gagal mengakses kamera. Pastikan kamera telah diizinkan.');
+                  console.error('❌ Camera access error:', error);
+              }
+          }
+
+          capturePhoto() {
+              console.log('=== CAPTURE PHOTO DEBUG ===');
+
+              const canvas = document.createElement('canvas');
+              const context = canvas.getContext('2d');
+
+              canvas.width = this.video.videoWidth;
+              canvas.height = this.video.videoHeight;
+
+              console.log(`📐 Canvas dimensions: ${canvas.width} x ${canvas.height}`);
+              console.log(`📹 Video dimensions: ${this.video.videoWidth} x ${this.video.videoHeight}`);
+
+              context.drawImage(this.video, 0, 0);
+
+              // Improved image quality settings
+              const quality = 0.8; // Reduce quality to reduce size
+              const imageData = canvas.toDataURL('image/jpeg', quality);
+
+              // Debug image data
+              console.log(`🖼️ Image data type: ${typeof imageData}`);
+              console.log(`🖼️ Image data prefix: ${imageData.substring(0, 50)}`);
+              console.log(`🖼️ Image data length: ${imageData.length}`);
+              console.log(`📍 Current position: ${this.currentPosition}`);
+              console.log(`👤 User ID: ${this.userId}`);
+
+              // Show loading
+              this.showLoading(true);
+              this.captureBtn.disabled = true;
+
+              // Send to server with debug info
+              console.log('📤 Sending capture_face event...');
+              this.socket.emit('capture_face', {
+                  user_id: this.userId,
+                  position: this.currentPosition,
+                  image: imageData
+              });
+          }
+
+          handleCaptureResult(data) {
+              console.log('=== CAPTURE RESULT DEBUG ===');
+              console.log('📥 Capture result:', data);
+
+              this.showLoading(false);
+              this.captureBtn.disabled = false;
+              this.isCaptureInProgress = false;
+
+              if (data.status === 'success') {
+                  console.log('✅ Capture successful:', data.message);
+
+                  this.completedPositions.push(this.currentPosition);
+                  this.markStepCompleted(this.currentPosition);
+                  this.showAlert('success', data.message);
+
+                  // Stop face detection for this position
+                  this.stopFaceDetection();
+
+                  // Move to next position
+                  this.moveToNextPosition();
+              } else {
+                  console.error('❌ Capture failed:', data.message);
+
+                  // Show specific error message
+                  const errorMessage = data.message || 'Terjadi kesalahan saat memproses gambar';
+                  this.showAlert('error', errorMessage);
+
+                  // Re-enable face detection after error with delay
+                  console.log('🔄 Restarting face detection in 3 seconds...');
+                  setTimeout(() => {
+                      this.isCaptureInProgress = false;
+                      this.startFaceDetection();
+                  }, 3000);
+              }
+
+              console.log('=== END CAPTURE RESULT DEBUG ===');
+          }
+
+          startFaceDetection() {
+              if (this.detectionInterval) {
+                  clearInterval(this.detectionInterval);
+              }
+
+              this.canvas.width = this.video.videoWidth;
+              this.canvas.height = this.video.videoHeight;
+
+              this.detectionInterval = setInterval(() => {
+                  this.detectFace();
+              }, 100); // Check every 100ms
+          }
+
+          stopFaceDetection() {
+              if (this.detectionInterval) {
+                  clearInterval(this.detectionInterval);
+                  this.detectionInterval = null;
+              }
+              if (this.countdownTimer) {
+                  clearTimeout(this.countdownTimer);
+                  this.countdownTimer = null;
+              }
+              this.isCountingDown = false;
+              this.countdownDisplay.style.display = 'none';
+          }
+
+          detectFace() {
+              if (this.isCaptureInProgress || this.isCountingDown) return;
+
+              this.context.drawImage(this.video, 0, 0, this.canvas.width, this.canvas.height);
+              const imageData = this.context.getImageData(0, 0, this.canvas.width, this.canvas.height);
+
+              // Simple face detection using brightness and contrast analysis
+              const faceDetected = this.simpleFaceDetection(imageData);
+
+              if (faceDetected) {
+                  this.stableFrames++;
+                  this.updateStatus('face-detected', 'Wajah terdeteksi! Tetap dalam posisi...');
+
+                  if (this.stableFrames >= this.requiredStableFrames) {
+                      this.startCountdown();
+                  }
+              } else {
+                  this.stableFrames = 0;
+                  this.updateStatus('face-not-detected', 'Posisikan wajah Anda di dalam frame kamera');
+                  if (this.countdownTimer) {
+                      clearTimeout(this.countdownTimer);
+                      this.countdownTimer = null;
+                      this.isCountingDown = false;
+                      this.countdownDisplay.style.display = 'none';
+                  }
+              }
+          }
+
+          simpleFaceDetection(imageData) {
+              const data = imageData.data;
+              const width = imageData.width;
+              const height = imageData.height;
+
+              // Define face detection area (center 60% of image)
+              const startX = Math.floor(width * 0.2);
+              const endX = Math.floor(width * 0.8);
+              const startY = Math.floor(height * 0.2);
+              const endY = Math.floor(height * 0.8);
+
+              let totalBrightness = 0;
+              let pixelCount = 0;
+              let skinTonePixels = 0;
+
+              for (let y = startY; y < endY; y++) {
+                  for (let x = startX; x < endX; x++) {
+                      const idx = (y * width + x) * 4;
+                      const r = data[idx];
+                      const g = data[idx + 1];
+                      const b = data[idx + 2];
+
+                      const brightness = (r + g + b) / 3;
+                      totalBrightness += brightness;
+                      pixelCount++;
+
+                      // Simple skin tone detection
+                      if (r > 95 && g > 40 && b > 20 &&
+                          r > g && r > b &&
+                          Math.abs(r - g) > 15) {
+                          skinTonePixels++;
+                      }
+                  }
+              }
+
+              const avgBrightness = totalBrightness / pixelCount;
+              const skinToneRatio = skinTonePixels / pixelCount;
+
+              // Face detected if we have good brightness and skin tone presence
+              return avgBrightness > 50 && avgBrightness < 200 && skinToneRatio > 0.1;
+          }
+
+          updateStatus(statusClass, message) {
+              this.statusMessage.className = `alert alert-${statusClass === 'face-detected' ? 'success' : statusClass === 'face-positioned' ? 'warning' : 'info'}`;
+              this.statusMessage.innerHTML = `<i class="fas fa-${statusClass === 'face-detected' ? 'check' : statusClass === 'face-positioned' ? 'clock' : 'search'} me-2"></i>${message}`;
+          }
+
+          startCountdown() {
+              if (this.isCountingDown || this.isCaptureInProgress) return;
+
+              this.isCountingDown = true;
+              this.countdownDisplay.style.display = 'block';
+              this.updateStatus('face-positioned', 'Bersiap untuk mengambil foto...');
+
+              let count = 3;
+              this.countdownNumber.textContent = count;
+
+              const countdown = () => {
+                  if (count > 1) {
+                      count--;
+                      this.countdownNumber.textContent = count;
+                      this.countdownTimer = setTimeout(countdown, 1000);
+                  } else {
+                      this.countdownDisplay.style.display = 'none';
+                      this.isCountingDown = false;
+                      this.isCaptureInProgress = true;
+                      this.capturePhoto();
+                  }
+              };
+
+              this.countdownTimer = setTimeout(countdown, 1000);
+          }
+
+          moveToNextPosition() {
+              const positions = ['front', 'left', 'right'];
+              const currentIndex = positions.indexOf(this.currentPosition);
+
+              if (currentIndex < positions.length - 1) {
+                  // Move to next position
+                  setTimeout(() => {
+                      this.currentPosition = positions[currentIndex + 1];
+                      this.updateUI();
+                      this.clearAlert();
+                      // Restart face detection for new position
+                      this.stableFrames = 0;
+                      this.faceDetected = false;
+                      this.startFaceDetection();
+                  }, 2000);
+              } else {
+                  // All positions completed
+                  setTimeout(() => {
+                      this.showCompletion();
+                  }, 2000);
+              }
+          }
+
+          updateUI() {
+              const position = this.positions[this.currentPosition];
+
+              // Update instruction
+              document.getElementById('instruction-text').textContent = position.instruction;
+
+              // Update progress steps
+              document.querySelectorAll('.progress-step').forEach(step => {
+                  step.classList.remove('active');
+              });
+              document.getElementById(`step-${this.currentPosition}`).classList.add('active');
+
+              // Reset status for new position
+              this.updateStatus('face-not-detected', 'Posisikan wajah Anda di dalam frame kamera');
+          }
+
+          markStepCompleted(position) {
+              const step = document.getElementById(`step-${position}`);
+              step.classList.remove('active');
+              step.classList.add('completed');
+              step.querySelector('.progress-circle').innerHTML = '<i class="fas fa-check"></i>';
+          }
+
+          showCompletion() {
+              document.getElementById('camera-section').style.display = 'none';
+              document.getElementById('navigation-section').style.display = 'none';
+              document.getElementById('completion-section').classList.remove('d-none');
+          }
+
+          showAlert(type, message) {
+              const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+              const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle';
+
+              this.alertArea.innerHTML = `
+                  <div class="alert ${alertClass} alert-custom">
+                      <i class="fas ${icon} me-2"></i>
+                      ${message}
+                  </div>
+              `;
+          }
+
+          clearAlert() {
+              setTimeout(() => {
+                  this.alertArea.innerHTML = '';
+              }, 3000);
+          }
+
+          showLoading(show) {
+              const loadingSection = document.getElementById('loading-section');
+              const cameraSection = document.getElementById('camera-section');
+
+              if (show) {
+                  loadingSection.style.display = 'block';
+                  cameraSection.style.opacity = '0.5';
+              } else {
+                  loadingSection.style.display = 'none';
+                  cameraSection.style.opacity = '1';
+              }
+          }
+      }
+
+      // Initialize when page loads
+      document.addEventListener('DOMContentLoaded', () => {
+          new FaceRegistration();
+      });
+    </script>
+  </body>
+</html>

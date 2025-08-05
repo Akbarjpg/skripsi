@@ -1,0 +1,44 @@
+{
+  "structure": {
+    "structure": true,
+    "configs": false,
+    "core": false,
+    "web": false,
+    "utils": false,
+    "templates": false,
+    "missing_files": [],
+    "issues": []
+  },
+  "configurations": {
+    "valid": true,
+    "configs": {
+      "config/default.json": true,
+      "config/development.json": true
+    },
+    "issues": []
+  },
+  "imports": {
+    "valid": true,
+    "imports": {
+      "utils.config": true,
+      "utils.logger": true,
+      "utils.environment": true,
+      "core.app_launcher": true,
+      "training.trainer": true,
+      "testing.test_runner": true
+    },
+    "issues": []
+  },
+  "templates": {
+    "valid": true,
+    "templates": {
+      "src/web/templates/base.html": true,
+      "src/web/templates/login.html": true,
+      "src/web/templates/register.html": true,
+      "src/web/templates/dashboard.html": true,
+      "src/web/templates/404.html": true,
+      "src/web/templates/index_clean.html": true
+    },
+    "issues": []
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "model": {
+    "architecture": "simple_cnn",
+    "input_size": [128, 128],
+    "num_classes": 2,
+    "dropout_rate": 0.3,
+    "pretrained": false,
+    "save_path": "models/quick_test_model.pth"
+  },
+  "training": {
+    "num_epochs": 5,
+    "batch_size": 16,
+    "learning_rate": 0.01,
+    "optimizer": "adam",
+    "weight_decay": 0.0001,
+    "early_stopping_patience": 3,
+    "num_workers": 2,
+    "scheduler": "step",
+    "warmup_epochs": 1
+  },
+  "data": {
+    "dataset_path": "test_img",
+    "train_split": 0.8,
+    "val_split": 0.2,
+    "test_split": 0.0,
+    "augmentation": false,
+    "normalize": true,
+    "resize_to": [128, 128]
+  },
+  "detection": {
+    "landmark_method": "mediapipe",
+    "confidence_threshold": 0.5,
+    "min_detection_confidence": 0.3,
+    "min_tracking_confidence": 0.3,
+    "blink_ear_threshold": 0.3,
+    "head_pose_threshold": 20.0
+  },
+  "challenge": {
+    "enabled": true,
+    "challenge_types": ["blink"],
+    "timeout_seconds": 5,
+    "min_challenges": 1,
+    "success_threshold": 0.6
+  },
+  "web": {
+    "host": "localhost",
+    "port": 5000,
+    "debug": true,
+    "secret_key": "dev-key-for-testing",
+    "database_url": "sqlite:///test_attendance.db"
+  },
+  "device": "auto",
+  "log_level": "DEBUG",
+  "save_predictions": false,
+  "logs_dir": "logs"
+}
