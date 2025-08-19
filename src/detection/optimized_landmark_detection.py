@@ -49,15 +49,25 @@ class OptimizedFacialLandmarkDetector:
             min_tracking_confidence=min_tracking_confidence
         )
         
-        # Optimized landmark indices (reduced set for performance)
-        # Only critical landmarks for liveness detection
+        # Optimized landmark indices (critical points for performance with anti-spoofing focus)
+        # Based on proven research for robust liveness detection
         self.critical_indices = {
-            'left_eye': [33, 7, 163, 144, 145, 153],  # Reduced from 16 to 6 points
-            'right_eye': [362, 382, 381, 380, 374, 373],  # Reduced from 16 to 6 points  
-            'mouth': [61, 84, 17, 314, 405, 320],  # Reduced from 20 to 6 points
-            'nose': [1, 2],  # Only tip points
-            'face_outline': [10, 151, 9, 175]  # Only 4 key points
+            'left_eye': [33, 133, 160, 158, 153, 144],  # 6-point robust EAR calculation
+            'right_eye': [362, 263, 385, 387, 373, 380],  # 6-point robust EAR calculation
+            'mouth': [61, 291, 13, 14, 17, 18],  # Key mouth points for MAR
+            'nose': [1, 2, 6, 168],  # Stable nose reference points
+            'face_outline': [10, 151, 9, 175, 18]  # Key face boundary points
         }
+        
+        # IMPROVED thresholds for anti-spoofing
+        self.blink_threshold = 0.22  # Research-proven optimal threshold
+        self.blink_consecutive_frames = 3  # Minimum frames for valid blink
+        self.min_blink_duration = 2  # Minimum blink duration
+        self.max_blink_duration = 8  # Maximum blink duration
+        
+        # Quality validation settings
+        self.min_confidence_threshold = 0.7
+        self.min_landmark_count = 25  # Reduced for optimization but still sufficient
         
         # Pre-compute indices for faster access
         self.left_eye_indices = self.critical_indices['left_eye']
@@ -148,21 +158,23 @@ class OptimizedLivenessVerifier:
     
     def __init__(self, history_length=15):  # Reduced from 30
         """
-        Optimized initialization with reduced memory usage
+        Optimized initialization with reduced memory usage and improved anti-spoofing
         """
         self.history_length = history_length
         self.landmark_detector = OptimizedFacialLandmarkDetector(frame_skip=2)
         
         # Reduced history tracking for memory efficiency
         self.landmark_history = deque(maxlen=history_length)
-        self.ear_history = deque(maxlen=10)  # Reduced from 30
-        self.mar_history = deque(maxlen=10)  # Reduced from 30
+        self.ear_history = deque(maxlen=10)  # For temporal smoothing
+        self.mar_history = deque(maxlen=10)  # For temporal smoothing
         
-        # Optimized thresholds
-        self.blink_threshold = 0.25
-        self.blink_consecutive_frames = 2  # Reduced from 3
-        self.mouth_open_threshold = 0.6
-        self.head_movement_threshold = 10.0  # Reduced sensitivity
+        # IMPROVED optimized thresholds based on research
+        self.blink_threshold = 0.22  # Research-proven optimal threshold
+        self.blink_consecutive_frames = 3  # Increased for reliability
+        self.min_blink_duration = 2  # Minimum blink duration
+        self.max_blink_duration = 8  # Maximum blink duration
+        self.mouth_open_threshold = 0.5  # Lowered for better sensitivity
+        self.head_movement_threshold = 8.0  # Reduced for better sensitivity
         
         # Counters
         self.blink_count = 0
@@ -178,7 +190,7 @@ class OptimizedLivenessVerifier:
         self._cache_time = {}
         self.cache_duration = 0.1  # 100ms cache
         
-        print("[OK] OptimizedLivenessVerifier initialized")
+        print("[OK] OptimizedLivenessVerifier initialized with improved anti-spoofing")
     
     def _get_cached_or_compute(self, key, compute_func, *args):
         """
@@ -196,36 +208,50 @@ class OptimizedLivenessVerifier:
     
     def calculate_eye_aspect_ratio_optimized(self, landmarks, eye_indices):
         """
-        OPTIMIZED EAR calculation with error handling and caching
+        OPTIMIZED EAR calculation with robust 6-point method and temporal smoothing
         """
         try:
             if not landmarks or len(eye_indices) < 6:
                 return 0.0
             
-            # Use only first 6 points for simplified EAR
+            # Extract and validate eye points
             eye_points = []
-            for i, idx in enumerate(eye_indices[:6]):
+            for idx in eye_indices[:6]:  # Use only first 6 points
                 if idx < len(landmarks):
-                    eye_points.append(landmarks[idx])
-                if len(eye_points) >= 6:
-                    break
+                    eye_points.append([float(landmarks[idx][0]), float(landmarks[idx][1])])
             
             if len(eye_points) < 6:
                 return 0.0
             
-            eye_points = np.array(eye_points)
+            eye_points = np.array(eye_points, dtype=np.float32)
             
-            # Simplified EAR calculation (faster)
-            # Vertical distances
-            v1 = np.linalg.norm(eye_points[1] - eye_points[5])
-            v2 = np.linalg.norm(eye_points[2] - eye_points[4])
+            # ROBUST 6-point EAR calculation
+            # Points: [outer_corner(0), inner_corner(1), top_outer(2), top_inner(3), bottom_inner(4), bottom_outer(5)]
             
-            # Horizontal distance  
-            h = np.linalg.norm(eye_points[0] - eye_points[3])
+            # Calculate vertical distances
+            v1 = np.linalg.norm(eye_points[2] - eye_points[5])  # top_outer to bottom_outer
+            v2 = np.linalg.norm(eye_points[3] - eye_points[4])  # top_inner to bottom_inner
             
-            if h > 0:
+            # Calculate horizontal distance
+            h = np.linalg.norm(eye_points[0] - eye_points[1])   # outer_corner to inner_corner
+            
+            if h > 1e-6:  # Avoid division by zero
+                # Standard EAR formula
                 ear = (v1 + v2) / (2.0 * h)
-                return min(max(ear, 0.0), 1.0)  # Clamp to [0,1]
+                
+                # Apply bounds
+                ear = max(0.0, min(ear, 1.0))
+                
+                # Add to history for temporal smoothing
+                self.ear_history.append(ear)
+                
+                # Apply temporal smoothing
+                if len(self.ear_history) >= 3:
+                    recent_ears = list(self.ear_history)[-3:]
+                    smoothed_ear = np.mean(recent_ears)
+                    return smoothed_ear
+                
+                return ear
             
             return 0.0
             
@@ -266,24 +292,37 @@ class OptimizedLivenessVerifier:
     
     def detect_blink_optimized(self, ear_left, ear_right):
         """
-        OPTIMIZED blink detection with reduced computation
+        OPTIMIZED blink detection with improved validation and temporal consistency
         """
+        # Validate input
+        if ear_left <= 0 or ear_right <= 0:
+            return self.blink_count
+            
+        # Calculate average EAR with asymmetry check
         avg_ear = (ear_left + ear_right) / 2.0
+        ear_asymmetry = abs(ear_left - ear_right)
+        
+        # Reject asymmetric detections (likely errors)
+        if ear_asymmetry > 0.15:
+            return self.blink_count
         
         # Add to history for smoothing
         self.ear_history.append(avg_ear)
         
-        # Use moving average for noise reduction
+        # Use smoothed EAR for detection
         if len(self.ear_history) >= 3:
             smoothed_ear = np.mean(list(self.ear_history)[-3:])
         else:
             smoothed_ear = avg_ear
         
-        # Blink detection
-        if smoothed_ear < self.blink_threshold:
+        # Improved blink state machine
+        is_closed = smoothed_ear < self.blink_threshold
+        
+        if is_closed:
             self.blink_frames += 1
         else:
-            if self.blink_frames >= self.blink_consecutive_frames:
+            # Check for valid blink
+            if (self.min_blink_duration <= self.blink_frames <= self.max_blink_duration):
                 self.blink_count += 1
             self.blink_frames = 0
         

@@ -52,6 +52,279 @@
         margin: 0 auto;
         border-radius: 15px;
         overflow: hidden;
+        background: #000;
+      }
+
+      /* Enhanced User Guidance Styles */
+      .guidance-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 10;
+      }
+
+      .face-guide-rectangle {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 250px;
+        height: 320px;
+        border: 3px dashed #00ff00;
+        border-radius: 15px;
+        opacity: 0.8;
+        transition: all 0.3s ease;
+      }
+
+      .face-guide-rectangle.good-position {
+        border-color: #00ff00;
+        box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+      }
+
+      .face-guide-rectangle.adjust-position {
+        border-color: #ffaa00;
+        box-shadow: 0 0 15px rgba(255, 170, 0, 0.5);
+      }
+
+      .face-guide-rectangle.poor-position {
+        border-color: #ff0000;
+        box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+      }
+
+      .coaching-message {
+        position: absolute;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-size: 14px;
+        font-weight: 500;
+        max-width: 90%;
+        text-align: center;
+        z-index: 15;
+        transition: all 0.3s ease;
+      }
+
+      .coaching-message.success {
+        background: rgba(40, 167, 69, 0.9);
+      }
+
+      .coaching-message.warning {
+        background: rgba(255, 193, 7, 0.9);
+        color: #000;
+      }
+
+      .coaching-message.error {
+        background: rgba(220, 53, 69, 0.9);
+      }
+
+      .progress-visualization {
+        margin: 20px 0;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 4px solid #007bff;
+      }
+
+      .challenge-progress {
+        margin: 15px 0;
+      }
+
+      .challenge-step {
+        display: flex;
+        align-items: center;
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+      }
+
+      .challenge-step.pending {
+        background: #f8f9fa;
+        border-left: 3px solid #6c757d;
+      }
+
+      .challenge-step.active {
+        background: #e3f2fd;
+        border-left: 3px solid #2196f3;
+        animation: pulse 2s infinite;
+      }
+
+      .challenge-step.completed {
+        background: #e8f5e8;
+        border-left: 3px solid #4caf50;
+      }
+
+      .challenge-step.failed {
+        background: #ffebee;
+        border-left: 3px solid #f44336;
+      }
+
+      @keyframes pulse {
+        0% { background: #e3f2fd; }
+        50% { background: #bbdefb; }
+        100% { background: #e3f2fd; }
+      }
+
+      .step-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        font-size: 14px;
+        font-weight: bold;
+      }
+
+      .step-icon.pending {
+        background: #6c757d;
+        color: white;
+      }
+
+      .step-icon.active {
+        background: #2196f3;
+        color: white;
+      }
+
+      .step-icon.completed {
+        background: #4caf50;
+        color: white;
+      }
+
+      .step-icon.failed {
+        background: #f44336;
+        color: white;
+      }
+
+      .environmental-feedback {
+        margin: 15px 0;
+        padding: 15px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+      }
+
+      .environmental-feedback.good {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+      }
+
+      .environmental-feedback.warning {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        color: #856404;
+      }
+
+      .environmental-feedback.error {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+      }
+
+      .method-status {
+        margin: 10px 0;
+        padding: 12px;
+        border-radius: 8px;
+        display: flex;
+        justify-content: between;
+        align-items: center;
+      }
+
+      .method-status.passed {
+        background: #d4edda;
+        border-left: 4px solid #28a745;
+      }
+
+      .method-status.failed {
+        background: #f8d7da;
+        border-left: 4px solid #dc3545;
+      }
+
+      .method-status.pending {
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+      }
+
+      .retry-section {
+        margin: 20px 0;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        text-align: center;
+        display: none;
+      }
+
+      .retry-section.show {
+        display: block;
+        animation: fadeIn 0.5s ease;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .audio-controls {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 20;
+      }
+
+      .audio-toggle {
+        background: rgba(0, 0, 0, 0.7);
+        border: none;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      .audio-toggle:hover {
+        background: rgba(0, 0, 0, 0.9);
+      }
+
+      .quality-indicators {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+        display: flex;
+        gap: 10px;
+        z-index: 15;
+      }
+
+      .quality-indicator {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+        color: white;
+      }
+
+      .quality-indicator.good {
+        background: rgba(40, 167, 69, 0.9);
+      }
+
+      .quality-indicator.warning {
+        background: rgba(255, 193, 7, 0.9);
+      }
+
+      .quality-indicator.error {
+        background: rgba(220, 53, 69, 0.9);
+      }
+        margin: 0 auto;
+        border-radius: 15px;
+        overflow: hidden;
         background-color: #000;
       }
 
@@ -312,9 +585,134 @@
               <div class="camera-container">
                 <video id="video" autoplay playsinline></video>
                 <div class="camera-overlay"></div>
+
+                <!-- Enhanced User Guidance Overlay -->
+                <div class="guidance-overlay" id="guidanceOverlay">
+                  <!-- Face Positioning Guide -->
+                  <div class="face-guide-rectangle" id="faceGuide"></div>
+
+                  <!-- Real-time Coaching Messages -->
+                  <div class="coaching-message" id="coachingMessage">
+                    Position your face in the guide rectangle
+                  </div>
+
+                  <!-- Quality Indicators -->
+                  <div class="quality-indicators" id="qualityIndicators">
+                    <span class="quality-indicator" id="lightingIndicator"
+                      >Lighting</span
+                    >
+                    <span class="quality-indicator" id="distanceIndicator"
+                      >Distance</span
+                    >
+                    <span class="quality-indicator" id="angleIndicator"
+                      >Angle</span
+                    >
+                  </div>
+                </div>
+
+                <!-- Audio Controls -->
+                <div class="audio-controls">
+                  <button
+                    class="audio-toggle"
+                    id="audioToggle"
+                    onclick="toggleAudioInstructions()"
+                  >
+                    🔊 Audio On
+                  </button>
+                </div>
               </div>
             </div>
             <div class="col-md-6">
+              <!-- Progress Visualization -->
+              <div class="progress-visualization" id="progressVisualization">
+                <h5>
+                  <i class="fas fa-tasks"></i> Anti-Spoofing Verification
+                  Progress
+                </h5>
+                <div class="challenge-progress" id="challengeProgress">
+                  <div class="challenge-step pending" id="step-initialization">
+                    <div class="step-icon pending">1</div>
+                    <div>
+                      <strong>Camera Initialization</strong>
+                      <div style="font-size: 12px; color: #6c757d">
+                        Setting up camera and preparing detection
+                      </div>
+                    </div>
+                  </div>
+                  <div class="challenge-step pending" id="step-face-detection">
+                    <div class="step-icon pending">2</div>
+                    <div>
+                      <strong>Face Detection</strong>
+                      <div style="font-size: 12px; color: #6c757d">
+                        Locating and tracking your face
+                      </div>
+                    </div>
+                  </div>
+                  <div class="challenge-step pending" id="step-quality-check">
+                    <div class="step-icon pending">3</div>
+                    <div>
+                      <strong>Quality Assessment</strong>
+                      <div style="font-size: 12px; color: #6c757d">
+                        Checking lighting, distance, and clarity
+                      </div>
+                    </div>
+                  </div>
+                  <div class="challenge-step pending" id="step-blink-detection">
+                    <div class="step-icon pending">4</div>
+                    <div>
+                      <strong>Blink Detection</strong>
+                      <div style="font-size: 12px; color: #6c757d">
+                        Please blink naturally when prompted
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="challenge-step pending"
+                    id="step-texture-analysis"
+                  >
+                    <div class="step-icon pending">5</div>
+                    <div>
+                      <strong>Texture Analysis</strong>
+                      <div style="font-size: 12px; color: #6c757d">
+                        Analyzing facial texture patterns
+                      </div>
+                    </div>
+                  </div>
+                  <div class="challenge-step pending" id="step-depth-analysis">
+                    <div class="step-icon pending">6</div>
+                    <div>
+                      <strong>Depth Analysis</strong>
+                      <div style="font-size: 12px; color: #6c757d">
+                        Measuring facial depth and 3D structure
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="challenge-step pending"
+                    id="step-final-verification"
+                  >
+                    <div class="step-icon pending">7</div>
+                    <div>
+                      <strong>Final Verification</strong>
+                      <div style="font-size: 12px; color: #6c757d">
+                        Combining all anti-spoofing methods
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Environmental Feedback -->
+              <div
+                class="environmental-feedback good"
+                id="environmentalFeedback"
+              >
+                <i class="fas fa-check-circle" style="margin-right: 10px"></i>
+                <span id="environmentalMessage"
+                  >Environment conditions are optimal</span
+                >
+              </div>
+
               <!-- Method Status -->
               <div class="method-status">
                 <div class="method-item checking" id="liveness-method">
@@ -330,6 +728,22 @@
                   <div>
                     <strong>Movement Detection</strong><br />
                     <small>Verifikasi gerakan natural</small>
+                  </div>
+                  <span class="status-badge status-checking">Checking...</span>
+                </div>
+                <div class="method-item checking" id="texture-method">
+                  <i class="fas fa-fingerprint method-icon text-info"></i>
+                  <div>
+                    <strong>Texture Analysis</strong><br />
+                    <small>Analisis tekstur kulit natural</small>
+                  </div>
+                  <span class="status-badge status-checking">Checking...</span>
+                </div>
+                <div class="method-item checking" id="depth-method">
+                  <i class="fas fa-cube method-icon text-success"></i>
+                  <div>
+                    <strong>3D Depth Analysis</strong><br />
+                    <small>Verifikasi struktur wajah 3D</small>
                   </div>
                   <span class="status-badge status-checking">Checking...</span>
                 </div>
@@ -374,6 +788,19 @@
 
         <!-- Result Area -->
         <div id="result-area"></div>
+
+        <!-- Retry Section -->
+        <div class="retry-section" id="retrySection">
+          <h5><i class="fas fa-redo"></i> Verification Failed</h5>
+          <p id="retryMessage">
+            Some anti-spoofing checks didn't pass. Please follow the guidance
+            below and try again:
+          </p>
+          <div id="retryGuidance"></div>
+          <button class="btn btn-primary" onclick="retryVerification()">
+            <i class="fas fa-redo"></i> Try Again
+          </button>
+        </div>
 
         <!-- Controls -->
         <div class="text-center mt-4">
@@ -722,6 +1149,229 @@
         }
       }
 
+      // Enhanced User Experience Functions
+      let audioEnabled = true;
+      let speechSynthesis = window.speechSynthesis;
+
+      function toggleAudioInstructions() {
+        audioEnabled = !audioEnabled;
+        const toggle = document.getElementById("audioToggle");
+        toggle.innerHTML = audioEnabled ? "🔊 Audio On" : "🔇 Audio Off";
+
+        if (audioEnabled) {
+          speakInstruction("Audio instructions enabled");
+        }
+      }
+
+      function speakInstruction(message) {
+        if (!audioEnabled || !speechSynthesis) return;
+
+        const utterance = new SpeechSynthesisUtterance(message);
+        utterance.rate = 0.9;
+        utterance.pitch = 1;
+        utterance.volume = 0.8;
+        speechSynthesis.speak(utterance);
+      }
+
+      function updateCoachingMessage(message, type = "info") {
+        const coachingElement = document.getElementById("coachingMessage");
+        if (coachingElement) {
+          coachingElement.textContent = message;
+          coachingElement.className = `coaching-message ${type}`;
+
+          if (audioEnabled) {
+            speakInstruction(message);
+          }
+        }
+      }
+
+      function updateFaceGuide(status) {
+        const faceGuide = document.getElementById("faceGuide");
+        if (faceGuide) {
+          faceGuide.className = `face-guide-rectangle ${status}`;
+        }
+      }
+
+      function updateQualityIndicators(lighting, distance, angle) {
+        const indicators = {
+          lightingIndicator: lighting,
+          distanceIndicator: distance,
+          angleIndicator: angle,
+        };
+
+        Object.keys(indicators).forEach((id) => {
+          const element = document.getElementById(id);
+          if (element) {
+            const status = indicators[id];
+            element.className = `quality-indicator ${status}`;
+          }
+        });
+      }
+
+      function updateEnvironmentalFeedback(message, type) {
+        const feedback = document.getElementById("environmentalFeedback");
+        const messageElement = document.getElementById("environmentalMessage");
+
+        if (feedback && messageElement) {
+          feedback.className = `environmental-feedback ${type}`;
+          messageElement.textContent = message;
+
+          const icon = feedback.querySelector("i");
+          if (icon) {
+            switch (type) {
+              case "good":
+                icon.className = "fas fa-check-circle";
+                break;
+              case "warning":
+                icon.className = "fas fa-exclamation-triangle";
+                break;
+              case "error":
+                icon.className = "fas fa-times-circle";
+                break;
+            }
+          }
+        }
+      }
+
+      function updateChallengeStep(stepId, status) {
+        const step = document.getElementById(stepId);
+        if (step) {
+          step.className = `challenge-step ${status}`;
+          const icon = step.querySelector(".step-icon");
+          if (icon) {
+            icon.className = `step-icon ${status}`;
+            if (status === "completed") {
+              icon.innerHTML = "✓";
+            } else if (status === "failed") {
+              icon.innerHTML = "✗";
+            }
+          }
+        }
+      }
+
+      function updateMethodStatus(methodId, status, explanation = "") {
+        const method = document.getElementById(methodId);
+        if (method) {
+          method.className = `method-status ${status}`;
+          const badge = method.querySelector(".status-badge");
+          if (badge) {
+            switch (status) {
+              case "passed":
+                badge.textContent = "Passed";
+                badge.className = "badge badge-success";
+                break;
+              case "failed":
+                badge.textContent = "Failed";
+                badge.className = "badge badge-danger";
+                break;
+              case "checking":
+                badge.textContent = "Checking...";
+                badge.className = "badge badge-warning";
+                break;
+            }
+          }
+
+          if (explanation) {
+            const small = method.querySelector("small");
+            if (small) {
+              small.textContent = explanation;
+            }
+          }
+        }
+      }
+
+      function showRetrySection(failedMethods, recommendations) {
+        const retrySection = document.getElementById("retrySection");
+        const retryGuidance = document.getElementById("retryGuidance");
+
+        if (retrySection && retryGuidance) {
+          let guidanceHtml = "<h6>Failed Checks:</h6><ul>";
+          failedMethods.forEach((method) => {
+            guidanceHtml += `<li><strong>${method.name}:</strong> ${method.reason}</li>`;
+          });
+          guidanceHtml += "</ul><h6>Recommendations:</h6><ul>";
+          recommendations.forEach((rec) => {
+            guidanceHtml += `<li>${rec}</li>`;
+          });
+          guidanceHtml += "</ul>";
+
+          retryGuidance.innerHTML = guidanceHtml;
+          retrySection.classList.add("show");
+
+          if (audioEnabled) {
+            speakInstruction(
+              "Verification failed. Please follow the recommendations and try again."
+            );
+          }
+        }
+      }
+
+      function retryVerification() {
+        const retrySection = document.getElementById("retrySection");
+        if (retrySection) {
+          retrySection.classList.remove("show");
+        }
+
+        // Reset all progress indicators
+        const steps = [
+          "step-initialization",
+          "step-face-detection",
+          "step-quality-check",
+          "step-blink-detection",
+          "step-texture-analysis",
+          "step-depth-analysis",
+          "step-final-verification",
+        ];
+        steps.forEach((stepId) => updateChallengeStep(stepId, "pending"));
+
+        // Reset method status
+        const methods = [
+          "liveness-method",
+          "landmark-method",
+          "texture-method",
+          "depth-method",
+        ];
+        methods.forEach((methodId) => updateMethodStatus(methodId, "checking"));
+
+        updateCoachingMessage(
+          "Position your face in the guide rectangle",
+          "info"
+        );
+        updateEnvironmentalFeedback("Preparing for retry...", "warning");
+
+        if (audioEnabled) {
+          speakInstruction(
+            "Starting verification retry. Please position your face in the guide rectangle."
+          );
+        }
+
+        // Restart the detection process
+        if (window.sequentialDetection) {
+          window.sequentialDetection.restartDetection();
+        }
+      }
+
+      // Enhanced detection guidance
+      function analyzeFrameQuality(frame) {
+        // This would be called from the detection system
+        let lighting = "good";
+        let distance = "good";
+        let angle = "good";
+        let message = "Perfect positioning!";
+        let messageType = "success";
+
+        // Example quality analysis logic would go here
+        // For now, we'll provide placeholder guidance
+
+        updateQualityIndicators(lighting, distance, angle);
+        updateCoachingMessage(message, messageType);
+        updateFaceGuide(
+          lighting === "good" && distance === "good" && angle === "good"
+            ? "good-position"
+            : "adjust-position"
+        );
+      }
+
       // Global functions
       function restartDetection() {
         if (window.sequentialDetection) {
@@ -732,6 +1382,20 @@
       // Initialize when page loads
       document.addEventListener("DOMContentLoaded", () => {
         window.sequentialDetection = new SequentialDetection();
+
+        // Initialize enhanced features
+        updateCoachingMessage(
+          "Position your face in the guide rectangle",
+          "info"
+        );
+        updateEnvironmentalFeedback("Camera initializing...", "warning");
+        updateChallengeStep("step-initialization", "active");
+
+        if (audioEnabled) {
+          speakInstruction(
+            "Welcome to face verification. Please position your face in the guide rectangle."
+          );
+        }
       });
     </script>
   </body>

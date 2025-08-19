@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Anti-Spoofing Attendance System</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .container {
+        max-width: 800px;
+        width: 90%;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        color: #ffffff;
+      }
+
+      .header p {
+        font-size: 1.2em;
+        opacity: 0.9;
+      }
+
+      .camera-container {
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+        background: #000;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      }
+
+      #video {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      .status-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 15px;
+        text-align: center;
+        transition: all 0.3s ease;
+      }
+
+      .status-overlay.success {
+        background: rgba(0, 150, 0, 0.9);
+      }
+
+      .status-overlay.error {
+        background: rgba(200, 0, 0, 0.9);
+      }
+
+      .status-overlay.processing {
+        background: rgba(255, 165, 0, 0.9);
+      }
+
+      .status-overlay.spoofing {
+        background: rgba(150, 0, 0, 0.9);
+        animation: pulse 1s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 0.9;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+        margin-top: 10px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: #00ff00;
+        width: 0%;
+        transition: width 0.3s ease;
+      }
+
+      .controls {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .btn {
+        padding: 12px 24px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+
+      .btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+      }
+
+      .btn.primary {
+        background: #4caf50;
+      }
+
+      .btn.primary:hover {
+        background: #45a049;
+      }
+
+      .security-info {
+        margin-top: 20px;
+        text-align: center;
+        font-size: 0.9em;
+        opacity: 0.8;
+      }
+
+      .admin-link {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        font-size: 14px;
+      }
+
+      .admin-link:hover {
+        color: white;
+      }
+
+      .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .feature {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+      }
+
+      .feature h3 {
+        color: #4caf50;
+        margin-bottom: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <a href="/admin" class="admin-link">Admin Panel</a>
+
+    <div class="container">
+      <div class="header">
+        <h1>🔒 Anti-Spoofing Attendance</h1>
+        <p>Secure face recognition with advanced spoofing detection</p>
+      </div>
+
+      <div class="camera-container">
+        <video id="video" autoplay muted></video>
+        <div id="status" class="status-overlay">
+          <div id="status-text">Initializing camera...</div>
+          <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="startBtn" class="btn primary">Start Detection</button>
+        <button id="resetBtn" class="btn">Reset Session</button>
+      </div>
+
+      <div class="features">
+        <div class="feature">
+          <h3>🎭 Photo Detection</h3>
+          <p>Detects printed photos and screen displays</p>
+        </div>
+        <div class="feature">
+          <h3>👁️ Liveness Check</h3>
+          <p>Verifies natural eye movements and blinking</p>
+        </div>
+        <div class="feature">
+          <h3>🌊 Depth Analysis</h3>
+          <p>3D face structure verification</p>
+        </div>
+        <div class="feature">
+          <h3>💓 Pulse Detection</h3>
+          <p>Remote photoplethysmography analysis</p>
+        </div>
+      </div>
+
+      <div class="security-info">
+        <p>🛡️ This system uses advanced AI to detect spoofing attacks</p>
+        <p>Your privacy is protected - no data is stored permanently</p>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+      // Initialize Socket.IO
+      const socket = io();
+
+      // DOM elements
+      const video = document.getElementById("video");
+      const statusDiv = document.getElementById("status");
+      const statusText = document.getElementById("status-text");
+      const progressFill = document.getElementById("progress-fill");
+      const startBtn = document.getElementById("startBtn");
+      const resetBtn = document.getElementById("resetBtn");
+
+      let stream = null;
+      let isProcessing = false;
+      let sessionId = null;
+
+      // Initialize camera
+      async function initCamera() {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              width: 640,
+              height: 480,
+              facingMode: "user",
+            },
+          });
+          video.srcObject = stream;
+          updateStatus(
+            'Camera ready. Click "Start Detection" to begin.',
+            "",
+            "success"
+          );
+        } catch (err) {
+          updateStatus(
+            "Camera access denied. Please allow camera access.",
+            "",
+            "error"
+          );
+        }
+      }
+
+      // Update status display
+      function updateStatus(message, detail = "", type = "") {
+        statusText.innerHTML = `
+                <div style="font-weight: bold; font-size: 1.1em;">${message}</div>
+                ${
+                  detail
+                    ? `<div style="font-size: 0.9em; margin-top: 5px;">${detail}</div>`
+                    : ""
+                }
+            `;
+
+        statusDiv.className = `status-overlay ${type}`;
+      }
+
+      // Update progress bar
+      function updateProgress(progress) {
+        progressFill.style.width = `${progress * 100}%`;
+      }
+
+      // Start detection
+      function startDetection() {
+        if (!stream || isProcessing) return;
+
+        isProcessing = true;
+        sessionId = `session_${Date.now()}`;
+        startBtn.disabled = true;
+        startBtn.textContent = "Processing...";
+
+        updateStatus(
+          "Starting detection...",
+          "Position your face clearly in the camera",
+          "processing"
+        );
+
+        // Capture and send frames
+        sendFrame();
+      }
+
+      // Send frame to server
+      function sendFrame() {
+        if (!isProcessing) return;
+
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0);
+
+        const frameData = canvas.toDataURL("image/jpeg", 0.8);
+
+        socket.emit("frame", {
+          frame: frameData,
+          session_id: sessionId,
+        });
+
+        // Continue sending frames if processing
+        if (isProcessing) {
+          setTimeout(sendFrame, 200); // 5 FPS
+        }
+      }
+
+      // Reset session
+      function resetSession() {
+        isProcessing = false;
+        sessionId = null;
+        startBtn.disabled = false;
+        startBtn.textContent = "Start Detection";
+        updateProgress(0);
+        updateStatus(
+          "Ready for next person",
+          'Click "Start Detection" to begin',
+          "success"
+        );
+
+        socket.emit("reset_session");
+      }
+
+      // Handle server responses
+      socket.on("result", function (data) {
+        const status = data.status;
+        const message = data.message || "";
+
+        switch (status) {
+          case "no_face":
+            updateStatus(
+              "No face detected",
+              "Please position your face clearly in the camera",
+              "processing"
+            );
+            updateProgress(0);
+            break;
+
+          case "low_confidence":
+            updateStatus(
+              "Face detection low",
+              "Please improve lighting and face position",
+              "processing"
+            );
+            updateProgress(0.2);
+            break;
+
+          case "processing":
+            const progress = data.progress || 0;
+            const frameInfo = data.is_live_frame
+              ? "✅ Live frame"
+              : "⚠️ Checking...";
+            updateStatus(
+              "Verifying authenticity...",
+              `${message}<br>${frameInfo}<br>Spoofing Score: ${(
+                data.spoofing_score || 0
+              ).toFixed(3)}`,
+              "processing"
+            );
+            updateProgress(progress);
+            break;
+
+          case "success":
+            isProcessing = false;
+            updateStatus(
+              "✅ Attendance Recorded!",
+              `Welcome! Time: ${data.timestamp}<br>Security Score: ${(
+                data.spoofing_score || 0
+              ).toFixed(3)}`,
+              "success"
+            );
+            updateProgress(1);
+
+            // Auto-reset after 3 seconds
+            setTimeout(() => {
+              resetSession();
+            }, 3000);
+            break;
+
+          case "spoofing_detected":
+            isProcessing = false;
+            updateStatus(
+              "🚨 SPOOFING DETECTED!",
+              `Attack Type: ${
+                data.attack_type || "Unknown"
+              }<br>Security Score: ${(data.spoofing_score || 0).toFixed(
+                3
+              )}<br>Access Denied`,
+              "spoofing"
+            );
+            updateProgress(0);
+
+            // Auto-reset after 5 seconds
+            setTimeout(() => {
+              resetSession();
+            }, 5000);
+            break;
+
+          case "cooldown":
+            updateStatus("⏰ Cooldown Active", message, "error");
+            updateProgress(0);
+            break;
+
+          case "error":
+            updateStatus("❌ Processing Error", message, "error");
+            updateProgress(0);
+            break;
+
+          case "reset":
+            updateStatus("Session Reset", "Ready for next person", "success");
+            break;
+        }
+      });
+
+      // Event listeners
+      startBtn.addEventListener("click", startDetection);
+      resetBtn.addEventListener("click", resetSession);
+
+      // Initialize on page load
+      window.addEventListener("load", initCamera);
+    </script>
+  </body>
+</html>

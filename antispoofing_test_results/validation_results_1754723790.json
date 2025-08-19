@@ -1,0 +1,11 @@
+{
+  "timestamp": 1754723696.5892937,
+  "test_summary": {},
+  "attack_simulation_results": {
+    "printed_photo": {
+      "detection_rate": 1.0,
+      "average_confidence": 0.16111169409714712,
+      "individual_results": [
+        {
+          "image_id": 0,
+          "predicted": 

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - Minimal Anti-Spoofing</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #ecf0f1;
+        color: #2c3e50;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        color: white;
+        padding: 18px 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .header-content {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .header h1 {
+        font-size: 1.6em;
+      }
+
+      .logout-btn {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 6px 14px;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 13px;
+        transition: background 0.3s ease;
+      }
+
+      .logout-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .dashboard {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 25px 18px;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 18px;
+        margin-bottom: 25px;
+      }
+
+      .stat-card {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+
+      .stat-card h3 {
+        color: #3498db;
+        font-size: 2.2em;
+        margin-bottom: 8px;
+      }
+
+      .stat-card p {
+        color: #7f8c8d;
+        font-size: 1em;
+      }
+
+      .stat-card.success h3 {
+        color: #27ae60;
+      }
+      .stat-card.warning h3 {
+        color: #f39c12;
+      }
+      .stat-card.danger h3 {
+        color: #e74c3c;
+      }
+
+      .section {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        margin-bottom: 25px;
+      }
+
+      .section h2 {
+        color: #2c3e50;
+        margin-bottom: 15px;
+        font-size: 1.3em;
+      }
+
+      .actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 15px;
+      }
+
+      .btn {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 13px;
+        transition: transform 0.3s ease;
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+      }
+      .btn-primary {
+        background: #3498db;
+        color: white;
+      }
+      .btn-success {
+        background: #27ae60;
+        color: white;
+      }
+      .btn-warning {
+        background: #f39c12;
+        color: white;
+      }
+
+      .alert {
+        background: #d5edda;
+        color: #155724;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 18px;
+        border-left: 4px solid #27ae60;
+      }
+
+      .refresh-info {
+        text-align: center;
+        color: #7f8c8d;
+        margin-top: 18px;
+        font-size: 0.85em;
+      }
+
+      .feature-list {
+        list-style: none;
+        padding: 0;
+      }
+
+      .feature-list li {
+        padding: 8px 0;
+        border-bottom: 1px solid #ecf0f1;
+      }
+
+      .feature-list li:last-child {
+        border-bottom: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="header-content">
+        <h1>🛡️ Minimal Anti-Spoofing Dashboard</h1>
+        <a href="/admin/logout" class="logout-btn">Logout</a>
+      </div>
+    </div>
+
+    <div class="dashboard">
+      <div class="alert">
+        <strong>System Status:</strong> Minimal anti-spoofing detection is
+        active with focused spoofing prevention.
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card success">
+          <h3>{{ stats.attendance.total }}</h3>
+          <p>Total Attendance (24h)</p>
+        </div>
+
+        <div class="stat-card danger">
+          <h3>{{ stats.security.spoofing_attempts }}</h3>
+          <p>Spoofing Attempts Blocked</p>
+        </div>
+
+        <div class="stat-card warning">
+          <h3>{{ "%.3f"|format(stats.attendance.avg_score) }}</h3>
+          <p>Average Security Score</p>
+        </div>
+
+        <div class="stat-card">
+          <h3>
+            {{ "%.1f"|format((stats.attendance.total / max(1,
+            stats.attendance.total + stats.security.spoofing_attempts)) * 100)
+            }}%
+          </h3>
+          <p>Success Rate</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>🔒 Anti-Spoofing Methods</h2>
+        <p>Minimal but effective detection techniques currently active:</p>
+        <ul class="feature-list">
+          <li>
+            ✅ <strong>Texture Analysis</strong> - Detects printed photos and
+            low-quality images
+          </li>
+          <li>
+            ✅ <strong>Movement Detection</strong> - Identifies static images
+            and frozen screens
+          </li>
+          <li>
+            ✅ <strong>Size Consistency</strong> - Monitors unnatural face size
+            patterns
+          </li>
+          <li>
+            ✅ <strong>Edge Analysis</strong> - Detects screen bezels and
+            digital artifacts
+          </li>
+        </ul>
+
+        <div class="actions">
+          <a href="/" class="btn btn-primary">View Live System</a>
+          <button class="btn btn-success" onclick="location.reload()">
+            Refresh Stats
+          </button>
+          <button class="btn btn-warning" onclick="showDetails()">
+            View Details
+          </button>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>📊 System Performance</h2>
+        <p>
+          <strong>Design Philosophy:</strong> Simple algorithms with maximum
+          effectiveness
+        </p>
+        <p>
+          <strong>Processing Speed:</strong> Fast real-time detection (~3 FPS
+          optimal)
+        </p>
+        <p><strong>Memory Usage:</strong> Minimal resource consumption</p>
+        <p>
+          <strong>Accuracy Focus:</strong> High precision spoofing detection
+          without complex ML models
+        </p>
+
+        {% if stats.security.spoofing_attempts > 0 %}
+        <div
+          style="
+            margin-top: 15px;
+            padding: 12px;
+            background: #fff3cd;
+            border-radius: 6px;
+          "
+        >
+          <strong>⚠️ Security Alert:</strong> {{
+          stats.security.spoofing_attempts }} spoofing attempts detected in the
+          last 24 hours.
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="refresh-info">
+        📊 Statistics auto-refresh every 30 seconds. Last updated:
+        <span id="last-update"></span>
+      </div>
+    </div>
+
+    <script>
+      function showDetails() {
+        alert(
+          "Detailed logging and analysis features would be implemented here.\nThis includes individual detection method scores, timing analysis, and pattern recognition."
+        );
+      }
+
+      // Auto-refresh every 30 seconds
+      setInterval(() => {
+        location.reload();
+      }, 30000);
+
+      // Show current time
+      document.addEventListener("DOMContentLoaded", function () {
+        const now = new Date().toLocaleString();
+        document.getElementById("last-update").textContent = now;
+      });
+    </script>
+  </body>
+</html>

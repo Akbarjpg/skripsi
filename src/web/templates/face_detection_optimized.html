@@ -67,6 +67,267 @@
         pointer-events: none;
       }
 
+      /* Enhanced User Guidance Styles for Optimized Template */
+      .guidance-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 10;
+      }
+
+      .face-guide-rectangle {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 280px;
+        height: 350px;
+        border: 3px dashed #00ff00;
+        border-radius: 15px;
+        opacity: 0.8;
+        transition: all 0.3s ease;
+      }
+
+      .face-guide-rectangle.good-position {
+        border-color: #00ff00;
+        box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
+      }
+
+      .face-guide-rectangle.adjust-position {
+        border-color: #ffaa00;
+        box-shadow: 0 0 20px rgba(255, 170, 0, 0.6);
+      }
+
+      .face-guide-rectangle.poor-position {
+        border-color: #ff0000;
+        box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
+      }
+
+      .coaching-message {
+        position: absolute;
+        top: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.85);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-size: 15px;
+        font-weight: 600;
+        max-width: 90%;
+        text-align: center;
+        z-index: 15;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      .coaching-message.success {
+        background: linear-gradient(45deg, #28a745, #20c997);
+      }
+
+      .coaching-message.warning {
+        background: linear-gradient(45deg, #ffc107, #fd7e14);
+        color: #000;
+      }
+
+      .coaching-message.error {
+        background: linear-gradient(45deg, #dc3545, #e83e8c);
+      }
+
+      .quality-indicators {
+        position: absolute;
+        bottom: 15px;
+        left: 15px;
+        display: flex;
+        gap: 12px;
+        z-index: 15;
+      }
+
+      .quality-indicator {
+        padding: 6px 12px;
+        border-radius: 15px;
+        font-size: 12px;
+        font-weight: bold;
+        color: white;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .quality-indicator.good {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+      }
+
+      .quality-indicator.warning {
+        background: linear-gradient(45deg, #ffc107, #fd7e14);
+        box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+      }
+
+      .quality-indicator.error {
+        background: linear-gradient(45deg, #dc3545, #e83e8c);
+        box-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
+      }
+
+      .audio-controls {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        z-index: 20;
+      }
+
+      .audio-toggle {
+        background: rgba(0, 0, 0, 0.7);
+        border: none;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        font-size: 14px;
+      }
+
+      .audio-toggle:hover {
+        background: rgba(0, 0, 0, 0.9);
+        transform: scale(1.05);
+      }
+
+      .environmental-feedback-optimized {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 10px;
+        padding: 15px;
+        margin: 15px 0;
+        display: flex;
+        align-items: center;
+        backdrop-filter: blur(10px);
+        border-left: 4px solid;
+      }
+
+      .environmental-feedback-optimized.good {
+        border-left-color: #28a745;
+        background: linear-gradient(
+          135deg,
+          rgba(40, 167, 69, 0.1),
+          rgba(32, 201, 151, 0.1)
+        );
+      }
+
+      .environmental-feedback-optimized.warning {
+        border-left-color: #ffc107;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 193, 7, 0.1),
+          rgba(253, 126, 20, 0.1)
+        );
+      }
+
+      .environmental-feedback-optimized.error {
+        border-left-color: #dc3545;
+        background: linear-gradient(
+          135deg,
+          rgba(220, 53, 69, 0.1),
+          rgba(232, 62, 140, 0.1)
+        );
+      }
+
+      .method-status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+      }
+
+      .method-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 10px;
+        padding: 15px;
+        transition: all 0.3s ease;
+        border-left: 4px solid;
+        backdrop-filter: blur(10px);
+      }
+
+      .method-card.passed {
+        border-left-color: #28a745;
+        background: linear-gradient(
+          135deg,
+          rgba(40, 167, 69, 0.1),
+          rgba(32, 201, 151, 0.1)
+        );
+      }
+
+      .method-card.failed {
+        border-left-color: #dc3545;
+        background: linear-gradient(
+          135deg,
+          rgba(220, 53, 69, 0.1),
+          rgba(232, 62, 140, 0.1)
+        );
+      }
+
+      .method-card.checking {
+        border-left-color: #ffc107;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 193, 7, 0.1),
+          rgba(253, 126, 20, 0.1)
+        );
+        animation: pulse-method 2s infinite;
+      }
+
+      @keyframes pulse-method {
+        0% {
+          background: linear-gradient(
+            135deg,
+            rgba(255, 193, 7, 0.1),
+            rgba(253, 126, 20, 0.1)
+          );
+        }
+        50% {
+          background: linear-gradient(
+            135deg,
+            rgba(255, 193, 7, 0.2),
+            rgba(253, 126, 20, 0.2)
+          );
+        }
+        100% {
+          background: linear-gradient(
+            135deg,
+            rgba(255, 193, 7, 0.1),
+            rgba(253, 126, 20, 0.1)
+          );
+        }
+      }
+
+      .retry-section-optimized {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 25px;
+        margin: 20px 0;
+        text-align: center;
+        display: none;
+        backdrop-filter: blur(10px);
+        border: 2px solid #dc3545;
+      }
+
+      .retry-section-optimized.show {
+        display: block;
+        animation: slideIn 0.5s ease;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
       .performance-panel {
         background: linear-gradient(45deg, #1e3c72, #2a5298);
         color: white;
@@ -302,6 +563,57 @@
                   muted
                 ></video>
                 <canvas id="overlay-canvas" width="640" height="480"></canvas>
+
+                <!-- Enhanced User Guidance Overlay -->
+                <div class="guidance-overlay" id="guidanceOverlayOptimized">
+                  <!-- Face Positioning Guide -->
+                  <div
+                    class="face-guide-rectangle"
+                    id="faceGuideOptimized"
+                  ></div>
+
+                  <!-- Real-time Coaching Messages -->
+                  <div class="coaching-message" id="coachingMessageOptimized">
+                    Position your face in the guide rectangle for optimal
+                    detection
+                  </div>
+
+                  <!-- Quality Indicators -->
+                  <div
+                    class="quality-indicators"
+                    id="qualityIndicatorsOptimized"
+                  >
+                    <span
+                      class="quality-indicator"
+                      id="lightingIndicatorOptimized"
+                      >Lighting</span
+                    >
+                    <span
+                      class="quality-indicator"
+                      id="distanceIndicatorOptimized"
+                      >Distance</span
+                    >
+                    <span class="quality-indicator" id="angleIndicatorOptimized"
+                      >Angle</span
+                    >
+                    <span
+                      class="quality-indicator"
+                      id="sharpnessIndicatorOptimized"
+                      >Sharpness</span
+                    >
+                  </div>
+                </div>
+
+                <!-- Audio Controls -->
+                <div class="audio-controls">
+                  <button
+                    class="audio-toggle"
+                    id="audioToggleOptimized"
+                    onclick="toggleAudioInstructionsOptimized()"
+                  >
+                    🔊 Audio On
+                  </button>
+                </div>
               </div>
 
               <!-- Landmark Legend -->
@@ -378,6 +690,114 @@
               </div>
               <div id="securityDetails">
                 <small class="text-muted">Waiting for analysis...</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Environmental Feedback -->
+          <div class="card">
+            <div class="card-header">
+              <h6 class="mb-0">
+                <i class="fas fa-eye"></i> Environmental Conditions
+              </h6>
+            </div>
+            <div class="card-body">
+              <div
+                class="environmental-feedback-optimized good"
+                id="environmentalFeedbackOptimized"
+              >
+                <i class="fas fa-check-circle" style="margin-right: 10px"></i>
+                <span id="environmentalMessageOptimized"
+                  >Optimal environment detected</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Anti-Spoofing Methods Status -->
+          <div class="card">
+            <div class="card-header">
+              <h6 class="mb-0">
+                <i class="fas fa-shield-virus"></i> Anti-Spoofing Methods
+              </h6>
+            </div>
+            <div class="card-body">
+              <div class="method-status-grid" id="methodStatusGrid">
+                <div class="method-card checking" id="method-blink-optimized">
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                    "
+                  >
+                    <div>
+                      <strong
+                        ><i class="fas fa-eye"></i> Blink Detection</strong
+                      >
+                      <div style="font-size: 12px; color: #6c757d">
+                        Natural eye movement analysis
+                      </div>
+                    </div>
+                    <span class="badge badge-warning">Checking</span>
+                  </div>
+                </div>
+                <div class="method-card checking" id="method-texture-optimized">
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                    "
+                  >
+                    <div>
+                      <strong
+                        ><i class="fas fa-fingerprint"></i> Texture
+                        Analysis</strong
+                      >
+                      <div style="font-size: 12px; color: #6c757d">
+                        Skin texture authenticity
+                      </div>
+                    </div>
+                    <span class="badge badge-warning">Checking</span>
+                  </div>
+                </div>
+                <div class="method-card checking" id="method-depth-optimized">
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                    "
+                  >
+                    <div>
+                      <strong><i class="fas fa-cube"></i> 3D Depth</strong>
+                      <div style="font-size: 12px; color: #6c757d">
+                        Facial structure depth
+                      </div>
+                    </div>
+                    <span class="badge badge-warning">Checking</span>
+                  </div>
+                </div>
+                <div class="method-card checking" id="method-motion-optimized">
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                    "
+                  >
+                    <div>
+                      <strong
+                        ><i class="fas fa-running"></i> Motion Analysis</strong
+                      >
+                      <div style="font-size: 12px; color: #6c757d">
+                        Head movement patterns
+                      </div>
+                    </div>
+                    <span class="badge badge-warning">Checking</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -476,6 +896,25 @@
                 </div>
               </div>
             </div>
+          </div>
+
+          <!-- Retry Section -->
+          <div class="retry-section-optimized" id="retrySectionOptimized">
+            <h5><i class="fas fa-redo"></i> Verification Failed</h5>
+            <p id="retryMessageOptimized">
+              Some anti-spoofing checks didn't pass. Please review the feedback
+              and try again:
+            </p>
+            <div
+              id="retryGuidanceOptimized"
+              style="text-align: left; margin: 15px 0"
+            ></div>
+            <button
+              class="btn btn-primary"
+              onclick="retryVerificationOptimized()"
+            >
+              <i class="fas fa-redo"></i> Try Again
+            </button>
           </div>
 
           <!-- Detailed Metrics -->
@@ -1101,6 +1540,200 @@
         // Auto-scroll to top
         logElement.scrollTop = 0;
       }
+
+      // Enhanced User Experience Functions for Optimized Template
+      let audioEnabledOptimized = true;
+      let speechSynthesisOptimized = window.speechSynthesis;
+
+      function toggleAudioInstructionsOptimized() {
+        audioEnabledOptimized = !audioEnabledOptimized;
+        const toggle = document.getElementById('audioToggleOptimized');
+        toggle.innerHTML = audioEnabledOptimized ? '🔊 Audio On' : '🔇 Audio Off';
+
+        if (audioEnabledOptimized) {
+          speakInstructionOptimized("Audio instructions enabled");
+        }
+      }
+
+      function speakInstructionOptimized(message) {
+        if (!audioEnabledOptimized || !speechSynthesisOptimized) return;
+
+        const utterance = new SpeechSynthesisUtterance(message);
+        utterance.rate = 0.9;
+        utterance.pitch = 1;
+        utterance.volume = 0.8;
+        speechSynthesisOptimized.speak(utterance);
+      }
+
+      function updateCoachingMessageOptimized(message, type = 'info') {
+        const coachingElement = document.getElementById('coachingMessageOptimized');
+        if (coachingElement) {
+          coachingElement.textContent = message;
+          coachingElement.className = `coaching-message ${type}`;
+
+          if (audioEnabledOptimized) {
+            speakInstructionOptimized(message);
+          }
+        }
+      }
+
+      function updateFaceGuideOptimized(status) {
+        const faceGuide = document.getElementById('faceGuideOptimized');
+        if (faceGuide) {
+          faceGuide.className = `face-guide-rectangle ${status}`;
+        }
+      }
+
+      function updateQualityIndicatorsOptimized(lighting, distance, angle, sharpness) {
+        const indicators = {
+          lightingIndicatorOptimized: lighting,
+          distanceIndicatorOptimized: distance,
+          angleIndicatorOptimized: angle,
+          sharpnessIndicatorOptimized: sharpness
+        };
+
+        Object.keys(indicators).forEach(id => {
+          const element = document.getElementById(id);
+          if (element) {
+            const status = indicators[id];
+            element.className = `quality-indicator ${status}`;
+          }
+        });
+      }
+
+      function updateEnvironmentalFeedbackOptimized(message, type) {
+        const feedback = document.getElementById('environmentalFeedbackOptimized');
+        const messageElement = document.getElementById('environmentalMessageOptimized');
+
+        if (feedback && messageElement) {
+          feedback.className = `environmental-feedback-optimized ${type}`;
+          messageElement.textContent = message;
+
+          const icon = feedback.querySelector('i');
+          if (icon) {
+            switch(type) {
+              case 'good':
+                icon.className = 'fas fa-check-circle';
+                break;
+              case 'warning':
+                icon.className = 'fas fa-exclamation-triangle';
+                break;
+              case 'error':
+                icon.className = 'fas fa-times-circle';
+                break;
+            }
+          }
+        }
+      }
+
+      function updateMethodStatusOptimized(methodId, status, explanation = '') {
+        const method = document.getElementById(methodId);
+        if (method) {
+          method.className = `method-card ${status}`;
+          const badge = method.querySelector('.badge');
+          if (badge) {
+            switch(status) {
+              case 'passed':
+                badge.textContent = 'Passed';
+                badge.className = 'badge badge-success';
+                break;
+              case 'failed':
+                badge.textContent = 'Failed';
+                badge.className = 'badge badge-danger';
+                break;
+              case 'checking':
+                badge.textContent = 'Checking';
+                badge.className = 'badge badge-warning';
+                break;
+            }
+          }
+
+          if (explanation) {
+            const small = method.querySelector('div[style*="font-size: 12px"]');
+            if (small) {
+              small.textContent = explanation;
+            }
+          }
+        }
+      }
+
+      function showRetrySectionOptimized(failedMethods, recommendations) {
+        const retrySection = document.getElementById('retrySectionOptimized');
+        const retryGuidance = document.getElementById('retryGuidanceOptimized');
+
+        if (retrySection && retryGuidance) {
+          let guidanceHtml = '<h6><i class="fas fa-exclamation-triangle"></i> Failed Checks:</h6><ul>';
+          failedMethods.forEach(method => {
+            guidanceHtml += `<li><strong>${method.name}:</strong> ${method.reason}</li>`;
+          });
+          guidanceHtml += '</ul><h6><i class="fas fa-lightbulb"></i> Recommendations:</h6><ul>';
+          recommendations.forEach(rec => {
+            guidanceHtml += `<li>${rec}</li>`;
+          });
+          guidanceHtml += '</ul>';
+
+          retryGuidance.innerHTML = guidanceHtml;
+          retrySection.classList.add('show');
+
+          if (audioEnabledOptimized) {
+            speakInstructionOptimized("Verification failed. Please follow the recommendations and try again.");
+          }
+        }
+      }
+
+      function retryVerificationOptimized() {
+        const retrySection = document.getElementById('retrySectionOptimized');
+        if (retrySection) {
+          retrySection.classList.remove('show');
+        }
+
+        // Reset method status
+        const methods = ['method-blink-optimized', 'method-texture-optimized', 'method-depth-optimized', 'method-motion-optimized'];
+        methods.forEach(methodId => updateMethodStatusOptimized(methodId, 'checking'));
+
+        updateCoachingMessageOptimized("Position your face in the guide rectangle for optimal detection", "info");
+        updateEnvironmentalFeedbackOptimized("Preparing for retry...", "warning");
+
+        if (audioEnabledOptimized) {
+          speakInstructionOptimized("Starting verification retry. Please position your face in the guide rectangle.");
+        }
+
+        // Restart the detection process
+        if (isDetecting) {
+          stopDetection();
+          setTimeout(() => startDetection(), 1000);
+        } else {
+          startDetection();
+        }
+      }
+
+      // Enhanced detection guidance for optimized template
+      function analyzeFrameQualityOptimized(frame) {
+        // This would be called from the detection system
+        let lighting = 'good';
+        let distance = 'good';
+        let angle = 'good';
+        let sharpness = 'good';
+        let message = 'Perfect positioning!';
+        let messageType = 'success';
+
+        // Example quality analysis logic would go here
+        // For now, we'll provide placeholder guidance
+
+        updateQualityIndicatorsOptimized(lighting, distance, angle, sharpness);
+        updateCoachingMessageOptimized(message, messageType);
+        updateFaceGuideOptimized(lighting === 'good' && distance === 'good' && angle === 'good' ? 'good-position' : 'adjust-position');
+      }
+
+      // Initialize enhanced features when page loads
+      document.addEventListener('DOMContentLoaded', function() {
+        updateCoachingMessageOptimized("Position your face in the guide rectangle for optimal detection", "info");
+        updateEnvironmentalFeedbackOptimized("Camera initializing...", "warning");
+
+        if (audioEnabledOptimized) {
+          speakInstructionOptimized("Welcome to optimized face verification. Please position your face in the guide rectangle.");
+        }
+      });
 
       // Cleanup on page unload
       window.addEventListener("beforeunload", function () {

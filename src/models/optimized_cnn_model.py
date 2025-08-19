@@ -251,8 +251,8 @@ class OptimizedLivenessPredictor:
                     image = cv2.resize(image, (self.input_size, self.input_size), 
                                      interpolation=cv2.INTER_LINEAR)
                 
-                # Convert BGR to RGB and normalize
-                image = image[:, :, ::-1]  # BGR to RGB
+                # Convert BGR to RGB and normalize - FIX NEGATIVE STRIDE ERROR
+                image = image[:, :, ::-1].copy()  # BGR to RGB with copy() to fix negative stride
                 tensor = torch.from_numpy(image).float() / 255.0
                 tensor = tensor.permute(2, 0, 1).unsqueeze(0)  # HWC to NCHW
             else:

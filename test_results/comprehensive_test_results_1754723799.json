@@ -1,0 +1,87 @@
+{
+  "test_suite_info": {
+    "timestamp": 1754723654.0042486,
+    "integration_available": true,
+    "validator_available": true,
+    "system_initialized": true
+  },
+  "test_results": {
+    "basic_functionality": {
+      "system_creation": true,
+      "basic_detection": true,
+      "result_structure": true,
+      "error_details": [],
+      "success": true
+    },
+    "advanced_detection": {
+      "texture_analysis": true,
+      "depth_estimation": true,
+      "micro_expression": true,
+      "eye_tracking": true,
+      "ppg_detection": true,
+      "fusion_logic": true,
+      "error_details": [],
+      "success": true
+    },
+    "performance": {
+      "processing_speed": false,
+      "memory_efficiency": true,
+      "concurrent_processing": true,
+      "performance_metrics": {
+        "total_time": 32.267393827438354,
+        "avg_time_per_image": 3.2267393827438355,
+        "estimated_fps": 0.3099103712397302
+      },
+      "error_details": [
+        "Processing too slow: 3.227s per image"
+      ],
+      "success": false
+    },
+    "error_handling": {
+      "invalid_image_handling": true,
+      "empty_image_handling": true,
+      "corrupted_data_handling": true,
+      "graceful_degradation": true,
+      "error_details": [],
+      "success": true
+    },
+    "integration": {
+      "configuration_loading": true,
+      "performance_tracking": true,
+      "validation_integration": false,
+      "result_serialization": false,
+      "error_details": [
+        "Result serialization test failed: Object of type bool is not JSON serializable"
+      ],
+      "success": true
+    },
+    "attack_simulations": {
+      "print_attack_detection": true,
+      "screen_attack_detection": true,
+      "video_replay_detection": true,
+      "mask_attack_detection": true,
+      "detection_accuracy": 1.0,
+      "error_details": [],
+      "success": true
+    }
+  },
+  "summary": {
+    "overall_success": true,
+    "total_tests_run": 6,
+    "tests_passed": 5,
+    "tests_failed": 1,
+    "critical_failures": [
+      "performance"
+    ],
+    "performance_summary": {
+      "avg_processing_time": 3.2267393827438355,
+      "estimated_fps": 0.3099103712397302,
+      "real_time_capable": false
+    },
+    "recommendations": [
+      "Address failed test categories for improved reliability",
+      "Optimize system performance for better responsiveness"
+    ],
+    "success_rate": 0.8333333333333334
+  }
+}

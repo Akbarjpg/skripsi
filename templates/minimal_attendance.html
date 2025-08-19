@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Minimal Anti-Spoofing Attendance</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+        color: white;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .container {
+        max-width: 700px;
+        width: 90%;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 25px;
+      }
+
+      .header h1 {
+        font-size: 2.2em;
+        margin-bottom: 8px;
+        color: #ffffff;
+      }
+
+      .header p {
+        font-size: 1.1em;
+        opacity: 0.9;
+      }
+
+      .camera-container {
+        position: relative;
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+        background: #000;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      }
+
+      #video {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      .status-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.85);
+        color: white;
+        padding: 12px;
+        text-align: center;
+        transition: all 0.3s ease;
+      }
+
+      .status-overlay.success {
+        background: rgba(0, 150, 0, 0.9);
+      }
+      .status-overlay.error {
+        background: rgba(200, 0, 0, 0.9);
+      }
+      .status-overlay.processing {
+        background: rgba(255, 165, 0, 0.9);
+      }
+      .status-overlay.spoofing {
+        background: rgba(150, 0, 0, 0.9);
+        animation: pulse 1s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 0.9;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 2px;
+        margin-top: 8px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: #00ff00;
+        width: 0%;
+        transition: width 0.3s ease;
+      }
+
+      .controls {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .btn {
+        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.3s ease;
+      }
+
+      .btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-1px);
+      }
+
+      .btn.primary {
+        background: #3498db;
+      }
+
+      .btn.primary:hover {
+        background: #2980b9;
+      }
+
+      .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .feature {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 12px;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 0.9em;
+      }
+
+      .feature h4 {
+        color: #3498db;
+        margin-bottom: 4px;
+        font-size: 0.9em;
+      }
+
+      .admin-link {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        font-size: 12px;
+      }
+
+      .admin-link:hover {
+        color: white;
+      }
+
+      .info {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 0.85em;
+        opacity: 0.8;
+      }
+    </style>
+  </head>
+  <body>
+    <a href="/admin" class="admin-link">Admin Panel</a>
+
+    <div class="container">
+      <div class="header">
+        <h1>🔒 Minimal Anti-Spoofing</h1>
+        <p>Simple & Effective Attendance System</p>
+      </div>
+
+      <div class="camera-container">
+        <video id="video" autoplay muted></video>
+        <div id="status" class="status-overlay">
+          <div id="status-text">Initializing camera...</div>
+          <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="startBtn" class="btn primary">Start Detection</button>
+        <button id="resetBtn" class="btn">Reset</button>
+      </div>
+
+      <div class="features">
+        <div class="feature">
+          <h4>📸 Photo Detection</h4>
+          <p>Texture analysis</p>
+        </div>
+        <div class="feature">
+          <h4>🎭 Movement Check</h4>
+          <p>Static image detection</p>
+        </div>
+        <div class="feature">
+          <h4>📺 Screen Detection</h4>
+          <p>Size & edge analysis</p>
+        </div>
+        <div class="feature">
+          <h4>⚡ Fast Processing</h4>
+          <p>Real-time detection</p>
+        </div>
+      </div>
+
+      <div class="info">
+        <p>🛡️ Simple but effective anti-spoofing technology</p>
+        <p>Focus: Maximum security with minimal complexity</p>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+      const socket = io();
+
+      const video = document.getElementById("video");
+      const statusDiv = document.getElementById("status");
+      const statusText = document.getElementById("status-text");
+      const progressFill = document.getElementById("progress-fill");
+      const startBtn = document.getElementById("startBtn");
+      const resetBtn = document.getElementById("resetBtn");
+
+      let stream = null;
+      let isProcessing = false;
+      let sessionId = null;
+
+      // Initialize camera
+      async function initCamera() {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { width: 640, height: 480, facingMode: "user" },
+          });
+          video.srcObject = stream;
+          updateStatus(
+            'Camera ready. Click "Start Detection" to begin.',
+            "success"
+          );
+        } catch (err) {
+          updateStatus(
+            "Camera access denied. Please allow camera access.",
+            "error"
+          );
+        }
+      }
+
+      function updateStatus(message, type = "") {
+        statusText.innerHTML = message;
+        statusDiv.className = `status-overlay ${type}`;
+      }
+
+      function updateProgress(progress) {
+        progressFill.style.width = `${progress * 100}%`;
+      }
+
+      function startDetection() {
+        if (!stream || isProcessing) return;
+
+        isProcessing = true;
+        sessionId = `session_${Date.now()}`;
+        startBtn.disabled = true;
+        startBtn.textContent = "Processing...";
+
+        updateStatus(
+          "Starting minimal anti-spoofing detection...",
+          "processing"
+        );
+        sendFrame();
+      }
+
+      function sendFrame() {
+        if (!isProcessing) return;
+
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0);
+
+        const frameData = canvas.toDataURL("image/jpeg", 0.8);
+
+        socket.emit("frame", {
+          frame: frameData,
+          session_id: sessionId,
+        });
+
+        if (isProcessing) {
+          setTimeout(sendFrame, 300); // ~3 FPS for minimal processing
+        }
+      }
+
+      function resetSession() {
+        isProcessing = false;
+        sessionId = null;
+        startBtn.disabled = false;
+        startBtn.textContent = "Start Detection";
+        updateProgress(0);
+        updateStatus("Ready for next person", "success");
+        socket.emit("reset_session");
+      }
+
+      // Handle server responses
+      socket.on("result", function (data) {
+        const status = data.status;
+        const message = data.message || "";
+
+        switch (status) {
+          case "no_face":
+            updateStatus(
+              "No face detected - Position face clearly",
+              "processing"
+            );
+            updateProgress(0);
+            break;
+
+          case "processing":
+            const progress = data.progress || 0;
+            const scoreInfo = data.spoofing_score
+              ? `<br>Security Score: ${data.spoofing_score.toFixed(3)}`
+              : "";
+            updateStatus(message + scoreInfo, "processing");
+            updateProgress(progress);
+            break;
+
+          case "success":
+            isProcessing = false;
+            updateStatus(
+              `✅ Attendance Recorded!<br>Time: ${
+                data.timestamp
+              }<br>Security Score: ${data.spoofing_score.toFixed(3)}`,
+              "success"
+            );
+            updateProgress(1);
+            setTimeout(resetSession, 3000);
+            break;
+
+          case "spoofing_detected":
+            isProcessing = false;
+            updateStatus(
+              `🚨 SPOOFING DETECTED!<br>Security Score: ${data.spoofing_score.toFixed(
+                3
+              )}<br>Access Denied`,
+              "spoofing"
+            );
+            updateProgress(0);
+            setTimeout(resetSession, 4000);
+            break;
+
+          case "error":
+            updateStatus(`❌ Error: ${message}`, "error");
+            updateProgress(0);
+            break;
+
+          case "reset":
+            updateStatus("Session Reset - Ready for next person", "success");
+            break;
+        }
+      });
+
+      startBtn.addEventListener("click", startDetection);
+      resetBtn.addEventListener("click", resetSession);
+
+      window.addEventListener("load", initCamera);
+    </script>
+  </body>
+</html>
