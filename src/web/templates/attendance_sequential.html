@@ -691,7 +691,7 @@
                     class="challenge-step pending"
                     id="step-final-verification"
                   >
-                    <div class="step-icon pending">7</div>
+                    <div class="step-icon pending">9</div>
                     <div>
                       <strong>Final Verification</strong>
                       <div style="font-size: 12px; color: #6c757d">
@@ -747,6 +747,14 @@
                   </div>
                   <span class="status-badge status-checking">Checking...</span>
                 </div>
+                <div class="method-item checking" id="distance-method">
+                  <i class="fas fa-ruler method-icon text-info"></i>
+                  <div>
+                    <strong>Distance Validation</strong><br />
+                    <small>Proximity and movement verification</small>
+                  </div>
+                  <span class="status-badge status-checking">Checking...</span>
+                </div>
               </div>
 
               <!-- Challenge Instructions -->
@@ -762,6 +770,28 @@
                   ></div>
                 </div>
                 <small id="challenge-timer">Waktu tersisa: --</small>
+                
+                <!-- Distance Challenge Progress -->
+                <div id="distance-progress" style="display: none; margin-top: 10px;">
+                  <div style="font-size: 14px; color: white;">
+                    <span id="distance-status">Distance Status</span>
+                  </div>
+                  <div style="font-size: 12px; opacity: 0.8;">
+                    <span id="distance-ratio">Current: --</span>
+                  </div>
+                </div>
+                
+                <!-- Audio Controls -->
+                <div style="margin-top: 15px; text-align: center;">
+                  <button 
+                    class="btn btn-sm btn-outline-light" 
+                    id="audioToggleBtn"
+                    onclick="toggleAudioFeedback()"
+                    style="border-radius: 20px;"
+                  >
+                    🔊 Audio Instructions
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -929,6 +959,7 @@
           // Update liveness method status
           const livenessMethod = document.getElementById("liveness-method");
           const landmarkMethod = document.getElementById("landmark-method");
+          const distanceMethod = document.getElementById("distance-method");
 
           if (data.liveness_results) {
             const livenessBadge = livenessMethod.querySelector(".status-badge");
@@ -953,8 +984,23 @@
               landmarkBadge.className = "status-badge status-passed";
             }
           }
+          
+          // Update distance method if available
+          if (data.distance_results && distanceMethod) {
+            const distanceBadge = distanceMethod.querySelector(".status-badge");
+            if (data.distance_results.challenge_passed) {
+              distanceMethod.classList.remove("checking");
+              distanceMethod.classList.add("passed");
+              distanceBadge.textContent = "PASSED";
+              distanceBadge.className = "status-badge status-passed";
+            } else {
+              distanceBadge.textContent = `${(
+                (data.distance_results.progress || 0) * 100
+              ).toFixed(0)}%`;
+            }
+          }
 
-          // Update challenge instructions
+          // Update challenge instructions with distance info
           if (data.challenge_info) {
             document.getElementById("challenge-instruction").textContent =
               data.challenge_info.instruction;
@@ -969,6 +1015,31 @@
             ).textContent = `Waktu tersisa: ${Math.ceil(
               data.challenge_info.time_remaining
             )}s`;
+            
+            // Show distance progress if it's a distance challenge
+            const distanceProgress = document.getElementById("distance-progress");
+            const distanceStatus = document.getElementById("distance-status");
+            const distanceRatio = document.getElementById("distance-ratio");
+            
+            if (data.challenge_info.challenge_type && 
+                (data.challenge_info.challenge_type.includes('distance') || 
+                 data.challenge_info.challenge_type.includes('move'))) {
+              
+              distanceProgress.style.display = "block";
+              distanceStatus.textContent = data.challenge_info.status || "Moving...";
+              
+              if (data.challenge_info.distance_info) {
+                const ratio = data.challenge_info.distance_info.size_ratio || 1.0;
+                distanceRatio.textContent = `Current: ${(ratio * 100).toFixed(0)}%`;
+              }
+            } else {
+              distanceProgress.style.display = "none";
+            }
+            
+            // Audio feedback for challenge updates
+            if (audioEnabled && data.challenge_info.audio_message) {
+              speakInstruction(data.challenge_info.audio_message);
+            }
           }
         }
 
@@ -1160,6 +1231,26 @@
 
         if (audioEnabled) {
           speakInstruction("Audio instructions enabled");
+        }
+      }
+      
+      function toggleAudioFeedback() {
+        audioEnabled = !audioEnabled;
+        const toggle = document.getElementById("audioToggleBtn");
+        toggle.innerHTML = audioEnabled ? "🔊 Audio Instructions" : "🔇 Audio Off";
+        toggle.className = audioEnabled ? 
+          "btn btn-sm btn-outline-light" : 
+          "btn btn-sm btn-outline-secondary";
+
+        if (audioEnabled) {
+          speakInstruction("Audio feedback enabled");
+        }
+        
+        // Send audio preference to server
+        if (window.sequentialDetection && window.sequentialDetection.socket) {
+          window.sequentialDetection.socket.emit('set_audio_enabled', {
+            audio_enabled: audioEnabled
+          });
         }
       }
 

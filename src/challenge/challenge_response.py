@@ -15,6 +15,22 @@ from dataclasses import dataclass, asdict
 from collections import deque
 import math
 
+# Import audio feedback system
+try:
+    from .audio_feedback import AudioFeedbackSystem, ChallengeInstructions, AudioType
+    AUDIO_AVAILABLE = True
+except ImportError:
+    AUDIO_AVAILABLE = False
+    print("Warning: Audio feedback not available")
+
+# Import distance challenge
+try:
+    from .distance_challenge import DistanceChallenge
+    DISTANCE_CHALLENGE_AVAILABLE = True
+except ImportError:
+    DISTANCE_CHALLENGE_AVAILABLE = False
+    print("Warning: Distance challenge not available")
+
 class ChallengeType(Enum):
     """Enhanced enum untuk tipe-tipe challenge anti-spoofing"""
     BLINK = "blink"
@@ -1016,16 +1032,38 @@ class SequenceChallenge(Challenge):
 class ChallengeResponseSystem:
     """
     Enhanced system untuk mengelola challenge-response dengan anti-spoofing
+    Now includes audio feedback and retry logic
     """
     
-    def __init__(self, anti_replay_window: float = 300.0):  # 5 minutes
+    def __init__(self, anti_replay_window: float = 300.0, 
+                 audio_enabled: bool = True, max_attempts: int = 3):  # 5 minutes
         self.current_challenge = None
         self.challenge_history = deque(maxlen=100)
         self.anti_replay_window = anti_replay_window
         self.used_challenges = set()
         
+        # Audio feedback system
+        self.audio_system = None
+        if AUDIO_AVAILABLE and audio_enabled:
+            self.audio_system = AudioFeedbackSystem(
+                audio_enabled=audio_enabled,
+                voice_enabled=audio_enabled
+            )
+        
+        # Retry logic
+        self.max_attempts = max_attempts
+        self.current_attempt = 0
+        self.failed_challenges = []
+        self.session_timeout = 30.0  # 30 seconds total session time
+        self.session_start_time = None
+        
+        # Security measures
+        self.challenge_timestamps = deque(maxlen=50)
+        self.last_success_time = None
+        self.replay_detection_enabled = True
+        
     def generate_random_challenge(self, difficulty: ChallengeDifficulty = None) -> Challenge:
-        """Generate random challenge dengan enhanced types"""
+        """Generate random challenge dengan enhanced types and audio feedback"""
         if difficulty is None:
             difficulty = random.choice(list(ChallengeDifficulty))
         
@@ -1035,9 +1073,14 @@ class ChallengeResponseSystem:
             ChallengeType.SMILE,
             ChallengeType.HEAD_MOVEMENT,
             ChallengeType.MOUTH_OPEN,
-            ChallengeType.COVER_EYE,
-            ChallengeType.MOVE_CLOSER
         ]
+        
+        # Add distance challenges if available
+        if DISTANCE_CHALLENGE_AVAILABLE:
+            challenge_types.extend([
+                ChallengeType.MOVE_CLOSER,
+                ChallengeType.MOVE_FARTHER
+            ])
         
         challenge_type = random.choice(challenge_types)
         challenge_id = f"{challenge_type.value}_{int(time.time())}_{random.randint(1000, 9999)}"
@@ -1049,13 +1092,15 @@ class ChallengeResponseSystem:
         self.used_challenges.add(challenge_id)
         
         # Create specific challenge with enhanced parameters
+        challenge = None
+        
         if challenge_type == ChallengeType.BLINK:
             required_blinks = 2 if difficulty == ChallengeDifficulty.EASY else (3 if difficulty == ChallengeDifficulty.MEDIUM else 4)
-            return BlinkChallenge(challenge_id, required_blinks=required_blinks, difficulty=difficulty)
+            challenge = BlinkChallenge(challenge_id, required_blinks=required_blinks, difficulty=difficulty)
             
         elif challenge_type == ChallengeType.SMILE:
             required_smiles = 1 if difficulty == ChallengeDifficulty.EASY else (2 if difficulty == ChallengeDifficulty.MEDIUM else 3)
-            return SmileChallenge(challenge_id, required_smiles=required_smiles, difficulty=difficulty)
+            challenge = SmileChallenge(challenge_id, required_smiles=required_smiles, difficulty=difficulty)
             
         elif challenge_type == ChallengeType.HEAD_MOVEMENT:
             if difficulty == ChallengeDifficulty.EASY:
@@ -1064,17 +1109,24 @@ class ChallengeResponseSystem:
                 directions = ['left', 'right', 'up', 'down']
             else:  # HARD
                 directions = ['left', 'right', 'up', 'down']
-            return HeadMovementChallenge(challenge_id, required_directions=directions, difficulty=difficulty)
+            challenge = HeadMovementChallenge(challenge_id, required_directions=directions, difficulty=difficulty)
             
         elif challenge_type == ChallengeType.MOUTH_OPEN:
             min_open_time = 1.0 if difficulty == ChallengeDifficulty.EASY else (1.5 if difficulty == ChallengeDifficulty.MEDIUM else 2.0)
-            return MouthOpenChallenge(challenge_id, min_open_time=min_open_time)
+            challenge = MouthOpenChallenge(challenge_id, min_open_time=min_open_time)
             
-        # For new challenge types, return basic implementation for now
-        elif challenge_type == ChallengeType.COVER_EYE:
-            return self._create_placeholder_challenge(challenge_id, challenge_type, difficulty)
-        elif challenge_type == ChallengeType.MOVE_CLOSER:
-            return self._create_placeholder_challenge(challenge_id, challenge_type, difficulty)
+        # Distance challenges
+        elif challenge_type == ChallengeType.MOVE_CLOSER and DISTANCE_CHALLENGE_AVAILABLE:
+            challenge = DistanceChallenge(challenge_id, direction="closer", difficulty=difficulty)
+            
+        elif challenge_type == ChallengeType.MOVE_FARTHER and DISTANCE_CHALLENGE_AVAILABLE:
+            challenge = DistanceChallenge(challenge_id, direction="farther", difficulty=difficulty)
+            
+        # Fallback for unimplemented challenge types
+        if challenge is None:
+            challenge = self._create_placeholder_challenge(challenge_id, challenge_type, difficulty)
+        
+        return challenge
     
     def _create_placeholder_challenge(self, challenge_id: str, challenge_type: ChallengeType, 
                                     difficulty: ChallengeDifficulty) -> Challenge:
@@ -1112,39 +1164,114 @@ class ChallengeResponseSystem:
         
     def start_challenge(self, challenge_type: str = 'random', 
                        difficulty: ChallengeDifficulty = None) -> Challenge:
-        """Start new challenge dengan enhanced options"""
+        """Start new challenge dengan enhanced options and audio feedback"""
+        
+        # Check session timeout
+        if self.session_start_time is None:
+            self.session_start_time = time.time()
+        elif time.time() - self.session_start_time > self.session_timeout:
+            print("Session timeout reached. Resetting session.")
+            self.reset_session()
+            self.session_start_time = time.time()
+        
+        # Check maximum attempts
+        if self.current_attempt >= self.max_attempts:
+            print(f"Maximum attempts ({self.max_attempts}) reached. Please try again later.")
+            if self.audio_system:
+                self.audio_system.play_warning("Maximum attempts reached. Please try again later.")
+            return None
+        
+        # Generate challenge
         if challenge_type == 'random':
             challenge = self.generate_random_challenge(difficulty)
         elif challenge_type == 'sequence':
             challenge = self.generate_sequence_challenge(difficulty=difficulty or ChallengeDifficulty.MEDIUM)
+        elif challenge_type == 'distance_closer' and DISTANCE_CHALLENGE_AVAILABLE:
+            challenge_id = f"distance_closer_{int(time.time())}_{random.randint(1000, 9999)}"
+            challenge = DistanceChallenge(challenge_id, direction="closer", difficulty=difficulty or ChallengeDifficulty.MEDIUM)
+        elif challenge_type == 'distance_farther' and DISTANCE_CHALLENGE_AVAILABLE:
+            challenge_id = f"distance_farther_{int(time.time())}_{random.randint(1000, 9999)}"
+            challenge = DistanceChallenge(challenge_id, direction="farther", difficulty=difficulty or ChallengeDifficulty.MEDIUM)
         else:
             raise ValueError(f"Unknown challenge type: {challenge_type}")
             
+        if challenge is None:
+            return None
+            
         challenge.start()
         self.current_challenge = challenge
+        self.current_attempt += 1
         
-        print(f"\\n🎯 New Challenge Started: {challenge.description}")
+        # Record challenge timestamp
+        self.challenge_timestamps.append(time.time())
+        
+        # Audio feedback
+        if self.audio_system:
+            self.audio_system.play_challenge_start(challenge.description)
+        
+        print(f"\n🎯 New Challenge Started: {challenge.description}")
         print(f"   Difficulty: {challenge.difficulty.value}")
         print(f"   Duration: {challenge.duration:.1f}s")
+        print(f"   Attempt: {self.current_attempt}/{self.max_attempts}")
+        
         return challenge
         
     def process_frame(self, detection_results: Dict) -> Optional[ChallengeResult]:
         """
         Process frame dengan detection results
         Returns ChallengeResult jika challenge completed
+        Includes enhanced audio feedback and retry logic
         """
         if self.current_challenge is None:
             return None
-            
+        
+        # Check for replay attacks
+        if self.replay_detection_enabled and self._detect_replay_attack(detection_results):
+            print("⚠️ Potential replay attack detected!")
+            if self.audio_system:
+                self.audio_system.play_warning("Replay attack detected")
+            self.current_challenge = None
+            return None
+        
         # Process response
         completed = self.current_challenge.process_response(detection_results)
+        
+        # Audio feedback for progress (every 5 seconds)
+        if (self.audio_system and self.current_challenge and 
+            hasattr(self.current_challenge, 'start_time') and
+            self.current_challenge.start_time):
+            
+            elapsed = time.time() - self.current_challenge.start_time
+            remaining = self.current_challenge.duration - elapsed
+            
+            # Countdown warnings
+            if remaining <= 5 and remaining > 4:
+                self.audio_system.play_countdown(int(remaining))
         
         if completed:
             result = self.current_challenge.get_result()
             self.challenge_history.append(result)
+            
+            # Audio feedback based on result
+            if self.audio_system:
+                if result.success:
+                    self.audio_system.play_challenge_success(result.challenge_type.value)
+                    self.last_success_time = time.time()
+                    self.current_attempt = 0  # Reset attempts on success
+                else:
+                    failure_reason = self._get_failure_reason(result)
+                    self.audio_system.play_challenge_failure(result.challenge_type.value, failure_reason)
+                    self.failed_challenges.append(result.challenge_type)
+            
             self.current_challenge = None
             
-            logging.info(f"Challenge completed: {result.challenge_id}, Success: {result.success}")
+            # Check if retry is needed
+            if not result.success and self.current_attempt < self.max_attempts:
+                print(f"Challenge failed. Attempts remaining: {self.max_attempts - self.current_attempt}")
+                self._provide_failure_guidance(result)
+            
+            logging.info(f"Challenge completed: {result.challenge_id}, Success: {result.success}, "
+                        f"Confidence: {result.confidence_score:.3f}, Quality: {result.quality_score:.3f}")
             return result
             
         return None
@@ -1207,106 +1334,280 @@ class ChallengeResponseSystem:
             'success_rate': success_rate,
             'average_response_time': avg_response_time,
             'average_confidence': avg_confidence,
-            'type_statistics': type_stats
+            'type_statistics': type_stats,
+            'current_attempt': self.current_attempt,
+            'max_attempts': self.max_attempts,
+            'session_active': self.session_start_time is not None,
+            'session_time_remaining': max(0, self.session_timeout - (time.time() - (self.session_start_time or time.time())))
         }
+    
+    def _detect_replay_attack(self, detection_results: Dict) -> bool:
+        """Detect potential replay attacks based on temporal patterns"""
+        if not self.replay_detection_enabled:
+            return False
+        
+        current_time = time.time()
+        
+        # Check for suspiciously regular timing
+        if len(self.challenge_timestamps) >= 3:
+            recent_intervals = []
+            for i in range(1, min(4, len(self.challenge_timestamps))):
+                interval = self.challenge_timestamps[-i] - self.challenge_timestamps[-i-1]
+                recent_intervals.append(interval)
+            
+            if recent_intervals:
+                interval_variance = np.var(recent_intervals)
+                if interval_variance < 0.1:  # Too regular timing
+                    return True
+        
+        # Check for identical frame patterns (simplified)
+        landmarks = detection_results.get('landmark_coordinates', [])
+        if landmarks and len(landmarks) > 10:
+            # Check if landmarks are suspiciously static
+            landmark_variance = np.var([point[0] for point in landmarks[:10]] + 
+                                      [point[1] for point in landmarks[:10]])
+            if landmark_variance < 0.001:  # Too static
+                return True
+        
+        return False
+    
+    def _get_failure_reason(self, result: ChallengeResult) -> str:
+        """Get human-readable failure reason"""
+        if result.quality_score < 0.5:
+            return "Poor detection quality"
+        elif result.intentional_score < 0.5:
+            return "Movement appears unnatural"
+        elif result.response_time >= result.details.get('duration', 15.0):
+            return "Time limit exceeded"
+        else:
+            return "Challenge requirements not met"
+    
+    def _provide_failure_guidance(self, result: ChallengeResult):
+        """Provide guidance based on failure reason"""
+        challenge_type = result.challenge_type.value
+        guidance = ChallengeInstructions.get_guidance(challenge_type)
+        
+        print(f"\n💡 Guidance for {challenge_type} challenge:")
+        for tip in guidance:
+            print(f"   • {tip}")
+        
+        if self.audio_system:
+            guidance_text = f"Tips for {challenge_type}: " + ". ".join(guidance[:2])  # Limit to first 2 tips
+            self.audio_system.speak(guidance_text)
+    
+    def reset_session(self):
+        """Reset challenge session"""
+        self.current_attempt = 0
+        self.failed_challenges.clear()
+        self.session_start_time = None
+        self.current_challenge = None
+        
+        if self.audio_system:
+            self.audio_system.speak("Challenge session reset")
+        
+        print("🔄 Challenge session reset")
+    
+    def get_session_status(self) -> Dict:
+        """Get current session status"""
+        return {
+            'session_active': self.session_start_time is not None,
+            'current_attempt': self.current_attempt,
+            'max_attempts': self.max_attempts,
+            'attempts_remaining': max(0, self.max_attempts - self.current_attempt),
+            'session_time_remaining': max(0, self.session_timeout - (time.time() - (self.session_start_time or time.time()))),
+            'has_current_challenge': self.current_challenge is not None,
+            'failed_challenge_types': [ct.value for ct in self.failed_challenges],
+            'audio_enabled': self.audio_system is not None
+        }
+    
+    def set_audio_enabled(self, enabled: bool):
+        """Enable/disable audio feedback"""
+        if self.audio_system:
+            self.audio_system.set_audio_enabled(enabled)
+            self.audio_system.set_voice_enabled(enabled)
+    
+    def shutdown(self):
+        """Shutdown challenge system"""
+        if self.audio_system:
+            self.audio_system.shutdown()
+        print("🔒 Challenge system shutdown")
 
 def test_challenge_response_system():
     """
-    Test function untuk challenge-response system
+    Enhanced test function untuk challenge-response system
+    Now includes audio feedback and retry logic testing
     """
     from src.detection.landmark_detection import LivenessVerifier
     
     # Initialize systems
     verifier = LivenessVerifier()
-    challenge_system = ChallengeResponseSystem()
+    challenge_system = ChallengeResponseSystem(audio_enabled=True, max_attempts=3)
     
     # Initialize webcam
     cap = cv2.VideoCapture(0)
     
-    print("Testing Challenge-Response System...")
-    print("Instructions will appear on screen")
-    print("Press 'n' for new challenge, 'q' to quit")
+    print("🎯 Testing Enhanced Challenge-Response System...")
+    print("=" * 60)
+    print("Instructions will appear on screen with audio feedback")
+    print("📋 Controls:")
+    print("   'n' - New random challenge")
+    print("   'e' - Easy challenge")  
+    print("   'm' - Medium challenge")
+    print("   'h' - Hard challenge")
+    print("   's' - Sequence challenge")
+    print("   'c' - Distance closer challenge")
+    print("   'f' - Distance farther challenge")
+    print("   'r' - Reset session")
+    print("   'a' - Toggle audio")
+    print("   'q' - Quit")
+    print("=" * 60)
     
     current_challenge = None
+    audio_enabled = True
     
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
+    try:
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+                
+            # Process facial landmarks
+            detection_results = verifier.process_frame(frame)
             
-        # Process facial landmarks
-        detection_results = verifier.process_frame(frame)
-        
-        # Process challenge if active
-        challenge_result = challenge_system.process_frame(detection_results)
-        
-        # Handle completed challenges
-        if challenge_result:
-            print(f"Challenge Result: {challenge_result.success}, "
-                  f"Time: {challenge_result.response_time:.2f}s, "
-                  f"Confidence: {challenge_result.confidence_score:.3f}")
-            current_challenge = None
-        
-        # Draw challenge status
-        challenge_status = challenge_system.get_current_challenge_status()
-        
-        if challenge_status:
-            # Draw challenge description
-            cv2.putText(frame, challenge_status['description'], (10, 30), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
+            # Process challenge if active
+            challenge_result = challenge_system.process_frame(detection_results)
             
-            # Draw timer
-            remaining = challenge_status['remaining_time']
-            cv2.putText(frame, f"Time: {remaining:.1f}s", (10, 70), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+            # Handle completed challenges
+            if challenge_result:
+                print(f"\n🎯 Challenge Result:")
+                print(f"   Success: {challenge_result.success}")
+                print(f"   Response Time: {challenge_result.response_time:.2f}s")
+                print(f"   Confidence: {challenge_result.confidence_score:.3f}")
+                print(f"   Quality: {challenge_result.quality_score:.3f}")
+                print(f"   Intentional: {challenge_result.intentional_score:.3f}")
+                current_challenge = None
             
-            # Draw progress bar
-            progress = challenge_status['progress']
-            bar_width = 300
-            bar_height = 20
-            cv2.rectangle(frame, (10, 90), (10 + bar_width, 90 + bar_height), (255, 255, 255), 2)
-            cv2.rectangle(frame, (10, 90), (10 + int(bar_width * progress), 90 + bar_height), (0, 255, 0), -1)
+            # Draw enhanced challenge status
+            challenge_status = challenge_system.get_current_challenge_status()
+            session_status = challenge_system.get_session_status()
             
-        else:
-            cv2.putText(frame, "Press 'n' for new challenge", (10, 30), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
+            # Display session info
+            y_offset = 30
+            cv2.putText(frame, f"Attempt: {session_status['current_attempt']}/{session_status['max_attempts']}", 
+                       (10, y_offset), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+            
+            session_time = session_status['session_time_remaining']
+            cv2.putText(frame, f"Session Time: {session_time:.1f}s", 
+                       (10, y_offset + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+            
+            if challenge_status:
+                # Draw challenge description
+                cv2.putText(frame, challenge_status['description'], (10, y_offset + 60), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
+                
+                # Draw timer with color coding
+                remaining = challenge_status['remaining_time']
+                timer_color = (0, 255, 0) if remaining > 5 else (0, 165, 255) if remaining > 2 else (0, 0, 255)
+                cv2.putText(frame, f"Time: {remaining:.1f}s", (10, y_offset + 90), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.7, timer_color, 2)
+                
+                # Draw progress bar
+                progress = challenge_status['progress']
+                bar_width = 300
+                bar_height = 20
+                cv2.rectangle(frame, (10, y_offset + 110), (10 + bar_width, y_offset + 110 + bar_height), (255, 255, 255), 2)
+                cv2.rectangle(frame, (10, y_offset + 110), (10 + int(bar_width * progress), y_offset + 110 + bar_height), (0, 255, 0), -1)
+                
+                # Distance challenge specific info
+                if hasattr(challenge_system.current_challenge, 'get_progress_info'):
+                    progress_info = challenge_system.current_challenge.get_progress_info()
+                    cv2.putText(frame, progress_info.get('message', ''), (10, y_offset + 140), 
+                               cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
+                
+            else:
+                cv2.putText(frame, "Press 'n' for new challenge", (10, y_offset + 60), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
+            
+            # Draw detection info
+            if detection_results['landmarks_detected']:
+                y_info = 200
+                cv2.putText(frame, f"Blinks: {detection_results['blink_count']}", (10, y_info), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+                
+                if detection_results['mouth_open']:
+                    cv2.putText(frame, "MOUTH OPEN", (10, y_info + 30), 
+                               cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+                
+                if detection_results['head_pose']:
+                    pose = detection_results['head_pose']
+                    cv2.putText(frame, f"Head: Y:{pose['yaw']:.0f}° P:{pose['pitch']:.0f}°", 
+                               (10, y_info + 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
+            
+            # Audio status indicator
+            audio_status = "🔊 ON" if audio_enabled else "🔇 OFF"
+            cv2.putText(frame, f"Audio: {audio_status}", (frame.shape[1] - 150, 30), 
+                       cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
+            
+            cv2.imshow('Enhanced Challenge-Response Test', frame)
+            
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord('q'):
+                break
+            elif key == ord('n') and challenge_status is None:
+                # Start new random challenge
+                challenge_system.start_challenge('random')
+            elif key == ord('e') and challenge_status is None:
+                # Start easy challenge
+                challenge_system.start_challenge('random', ChallengeDifficulty.EASY)
+            elif key == ord('m') and challenge_status is None:
+                # Start medium challenge
+                challenge_system.start_challenge('random', ChallengeDifficulty.MEDIUM)
+            elif key == ord('h') and challenge_status is None:
+                # Start hard challenge
+                challenge_system.start_challenge('random', ChallengeDifficulty.HARD)
+            elif key == ord('s') and challenge_status is None:
+                # Start sequence challenge
+                challenge_system.start_challenge('sequence')
+            elif key == ord('c') and challenge_status is None and DISTANCE_CHALLENGE_AVAILABLE:
+                # Start distance closer challenge
+                challenge_system.start_challenge('distance_closer')
+            elif key == ord('f') and challenge_status is None and DISTANCE_CHALLENGE_AVAILABLE:
+                # Start distance farther challenge
+                challenge_system.start_challenge('distance_farther')
+            elif key == ord('r'):
+                # Reset session
+                challenge_system.reset_session()
+            elif key == ord('a'):
+                # Toggle audio
+                audio_enabled = not audio_enabled
+                challenge_system.set_audio_enabled(audio_enabled)
+                print(f"Audio {'enabled' if audio_enabled else 'disabled'}")
         
-        # Draw detection info
-        if detection_results['landmarks_detected']:
-            y_offset = 130
-            cv2.putText(frame, f"Blinks: {detection_results['blink_count']}", (10, y_offset), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-            
-            if detection_results['mouth_open']:
-                cv2.putText(frame, "MOUTH OPEN", (10, y_offset + 30), 
-                           cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
-            
-            if detection_results['head_pose']:
-                pose = detection_results['head_pose']
-                cv2.putText(frame, f"Head: Y:{pose['yaw']:.0f}° P:{pose['pitch']:.0f}°", 
-                           (10, y_offset + 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
+        # Print final statistics
+        stats = challenge_system.get_challenge_statistics()
+        print("\n" + "=" * 60)
+        print("📊 FINAL CHALLENGE STATISTICS")
+        print("=" * 60)
+        for key, value in stats.items():
+            if key != 'type_statistics':
+                print(f"{key.replace('_', ' ').title()}: {value}")
         
-        cv2.imshow('Challenge-Response Test', frame)
-        
-        key = cv2.waitKey(1) & 0xFF
-        if key == ord('q'):
-            break
-        elif key == ord('n') and challenge_status is None:
-            # Start new random challenge
-            challenge_system.start_challenge('random')
-        elif key == ord('s') and challenge_status is None:
-            # Start sequence challenge
-            challenge_system.start_challenge('sequence')
+        if 'type_statistics' in stats:
+            print(f"\n📈 By Challenge Type:")
+            for challenge_type, type_stats in stats['type_statistics'].items():
+                success_rate = (type_stats['success'] / type_stats['total']) * 100 if type_stats['total'] > 0 else 0
+                avg_time = np.mean(type_stats['response_times']) if type_stats['response_times'] else 0
+                print(f"   {challenge_type}: {success_rate:.1f}% success, {avg_time:.2f}s avg time")
     
-    # Print statistics
-    stats = challenge_system.get_challenge_statistics()
-    print("\\n=== Challenge Statistics ===")
-    for key, value in stats.items():
-        if key != 'type_statistics':
-            print(f"{key}: {value}")
-    
-    cap.release()
-    cv2.destroyAllWindows()
+    except KeyboardInterrupt:
+        print("\n🛑 Test interrupted by user")
+    except Exception as e:
+        print(f"\n❌ Test error: {e}")
+    finally:
+        challenge_system.shutdown()
+        cap.release()
+        cv2.destroyAllWindows()
+        print("🔒 Test completed and resources cleaned up")
 
 if __name__ == "__main__":
     test_challenge_response_system()
