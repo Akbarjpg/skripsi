@@ -25,12 +25,24 @@ from flask_socketio import SocketIO, emit
 from werkzeug.security import generate_password_hash, check_password_hash
 from collections import deque
 
-# Face recognition import
+# Import enhanced antispoofing system
 try:
-    import face_recognition
-except ImportError:
-    print("Warning: face_recognition not available, using fallback")
-    face_recognition = None
+    from src.integration.realtime_antispoofing_system import RealTimeAntiSpoofingSystem
+    ENHANCED_ANTISPOOFING_AVAILABLE = True
+except ImportError as e:
+    print(f"Enhanced antispoofing system not available: {e}")
+    ENHANCED_ANTISPOOFING_AVAILABLE = False
+
+# Import existing detection systems
+from src.models.cnn_model import CNNPredictor
+from src.detection.landmark_detection import LivenessVerifier
+
+# Additional imports for enhanced processing
+from collections import defaultdict, deque
+import threading
+import queue
+import secrets
+import hashlib
 
 
 def convert_to_serializable(obj):
@@ -1047,6 +1059,25 @@ class EnhancedFrameProcessor:
         self.security_states = {}  # Enhanced security assessment states
         self.frame_processors = {}  # Per-session frame processors
         
+        # Enhanced Anti-Spoofing Integration
+        if ENHANCED_ANTISPOOFING_AVAILABLE:
+            try:
+                self.enhanced_antispoofing = RealTimeAntiSpoofingSystem({
+                    'confidence_threshold': 0.95,
+                    'session_timeout': 60,
+                    'challenge_timeout': 15,
+                    'device': 'cpu'
+                })
+                self.use_enhanced_antispoofing = True
+                print("✅ Enhanced Real-Time Anti-Spoofing System initialized")
+            except Exception as e:
+                print(f"❌ Failed to initialize enhanced antispoofing: {e}")
+                self.enhanced_antispoofing = None
+                self.use_enhanced_antispoofing = False
+        else:
+            self.enhanced_antispoofing = None
+            self.use_enhanced_antispoofing = False
+
         print("[OK] EnhancedFrameProcessor initialized with intelligent processing")
     
     def assess_frame_quality(self, image):
@@ -1521,7 +1552,229 @@ class EnhancedFrameProcessor:
         # Use hash of first 1000 bytes for speed
         return hash(image_data[:1000])
     
-    def process_frame_sequential(self, image, session_id="default", user_id=None):
+    def process_frame_enhanced_antispoofing(self, image, session_id="default", user_id=None):
+        """
+        Process frame using Enhanced Real-Time Anti-Spoofing System (Step 1 Implementation)
+        
+        This implements the Step 1 requirements from yangIni.md:
+        - Real-time face anti-spoofing detection that runs BEFORE attendance checking
+        - Multiple anti-spoofing techniques simultaneously
+        - Challenge-response system integration
+        - Progress indicators and confidence thresholds
+        """
+        start_time = time.time()
+        
+        try:
+            if not self.use_enhanced_antispoofing or not self.enhanced_antispoofing:
+                return self._fallback_to_sequential_processing(image, session_id, user_id)
+            
+            # Process frame through enhanced anti-spoofing system
+            antispoofing_result = self.enhanced_antispoofing.process_frame(image)
+            
+            # Check if anti-spoofing verification is complete and successful
+            if (antispoofing_result.get('status') == 'verified' and 
+                antispoofing_result.get('is_real_face', False)):
+                
+                # Phase 1 (Anti-spoofing) passed - proceed to Phase 2 (Face Recognition)
+                recognition_result = self._process_face_recognition_phase(image, session_id, user_id)
+                
+                # Combine results
+                combined_result = {
+                    'session_id': str(session_id),
+                    'phase': 'recognition_complete',
+                    'status': recognition_result.get('status', 'unknown'),
+                    'message': recognition_result.get('message', 'Recognition completed'),
+                    'antispoofing_results': antispoofing_result,
+                    'recognition_results': recognition_result,
+                    'processing_time': time.time() - start_time,
+                    'implementation': 'enhanced_antispoofing_step1'
+                }
+                
+                # Reset anti-spoofing session if recognition completed
+                if recognition_result.get('status') in ['success', 'new_user']:
+                    self.enhanced_antispoofing.reset_session()
+                
+                return convert_to_serializable(combined_result)
+            
+            else:
+                # Still in Phase 1 (Anti-spoofing) - return anti-spoofing progress
+                result = {
+                    'session_id': str(session_id),
+                    'phase': 'antispoofing',
+                    'status': antispoofing_result.get('status', 'processing'),
+                    'message': antispoofing_result.get('message', 'Verifying face authenticity...'),
+                    'progress': antispoofing_result.get('progress', {}),
+                    'challenge_info': antispoofing_result.get('challenge_info'),
+                    'confidence': antispoofing_result.get('confidence', 0.0),
+                    'processing_time': time.time() - start_time,
+                    'session_stats': self.enhanced_antispoofing.get_session_stats(),
+                    'implementation': 'enhanced_antispoofing_step1'
+                }
+                
+                return convert_to_serializable(result)
+            
+        except Exception as e:
+            logger.error(f"Enhanced anti-spoofing processing error: {e}")
+            
+            # Fallback to sequential processing
+            return self._fallback_to_sequential_processing(image, session_id, user_id)
+    
+    def _process_face_recognition_phase(self, image, session_id, user_id):
+        """
+        Process Phase 2: Face Recognition using CNN (after anti-spoofing verification)
+        
+        This phase only runs AFTER Phase 1 (anti-spoofing) has successfully verified
+        that the face is real. Uses CNN for face recognition without requiring 
+        additional challenges from the user.
+        """
+        try:
+            # Convert image for face_recognition
+            rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            
+            # Import face_recognition here to handle missing dependency
+            try:
+                import face_recognition
+            except ImportError:
+                return {
+                    'status': 'error',
+                    'message': 'Face recognition library not available',
+                    'user_id': None
+                }
+            
+            face_locations = face_recognition.face_locations(rgb_image)
+            
+            if len(face_locations) == 0:
+                return {
+                    'status': 'no_face',
+                    'message': 'No face detected for recognition',
+                    'user_id': None
+                }
+            
+            if len(face_locations) > 1:
+                return {
+                    'status': 'multiple_faces',
+                    'message': 'Multiple faces detected. Please ensure only one person is visible.',
+                    'user_id': None
+                }
+            
+            # Extract face encoding
+            face_encodings = face_recognition.face_encodings(rgb_image, face_locations)
+            if len(face_encodings) == 0:
+                return {
+                    'status': 'encoding_failed',
+                    'message': 'Failed to extract face features',
+                    'user_id': None
+                }
+            
+            current_encoding = face_encodings[0]
+            
+            # Compare with database
+            db_path = 'attendance.db'
+            matched_user = None
+            best_distance = float('inf')
+            recognition_threshold = 0.6  # Adjust as needed
+            
+            try:
+                import sqlite3
+                with sqlite3.connect(db_path) as conn:
+                    cursor = conn.cursor()
+                    
+                    # Get all registered face data
+                    cursor.execute('''
+                        SELECT fd.user_id, fd.face_encoding, u.username, u.full_name 
+                        FROM face_data fd 
+                        JOIN users u ON fd.user_id = u.id 
+                        WHERE u.is_active = 1
+                    ''')
+                    
+                    registered_faces = cursor.fetchall()
+                    
+                    for user_id_db, encoding_json, username, full_name in registered_faces:
+                        try:
+                            stored_encoding = np.array(json.loads(encoding_json))
+                            distance = face_recognition.face_distance([stored_encoding], current_encoding)[0]
+                            
+                            if distance < best_distance:
+                                best_distance = distance
+                                if distance < recognition_threshold:
+                                    matched_user = {
+                                        'user_id': user_id_db,
+                                        'username': username,
+                                        'full_name': full_name,
+                                        'confidence': 1.0 - distance
+                                    }
+                        except (json.JSONDecodeError, ValueError) as e:
+                            logger.warning(f"Invalid face encoding for user {user_id_db}: {e}")
+                            continue
+            
+            except sqlite3.Error as e:
+                logger.error(f"Database error during face recognition: {e}")
+                return {
+                    'status': 'database_error',
+                    'message': 'Database connection failed',
+                    'user_id': None
+                }
+            
+            if matched_user:
+                # Record attendance
+                self._record_attendance(matched_user['user_id'], confidence=matched_user['confidence'])
+                
+                return {
+                    'status': 'success',
+                    'message': f"Welcome, {matched_user['full_name']}! Attendance recorded.",
+                    'user_id': matched_user['user_id'],
+                    'username': matched_user['username'],
+                    'full_name': matched_user['full_name'],
+                    'confidence': matched_user['confidence'],
+                    'recognition_distance': best_distance
+                }
+            else:
+                return {
+                    'status': 'new_user',
+                    'message': 'Face not recognized. Please register first.',
+                    'user_id': None,
+                    'best_match_distance': best_distance
+                }
+                
+        except Exception as e:
+            logger.error(f"Face recognition phase error: {e}")
+            return {
+                'status': 'error',
+                'message': f'Recognition error: {str(e)[:50]}',
+                'user_id': None
+            }
+    
+    def _record_attendance(self, user_id, confidence=1.0):
+        """Record attendance in database"""
+        try:
+            import sqlite3
+            with sqlite3.connect('attendance.db') as conn:
+                cursor = conn.cursor()
+                
+                # Check if user already has attendance today
+                cursor.execute('''
+                    SELECT id FROM attendance 
+                    WHERE user_id = ? AND DATE(timestamp) = DATE('now')
+                ''', (user_id,))
+                
+                if cursor.fetchone() is None:
+                    # Record new attendance
+                    cursor.execute('''
+                        INSERT INTO attendance (user_id, timestamp, confidence_score)
+                        VALUES (?, datetime('now'), ?)
+                    ''', (user_id, confidence))
+                    
+                    logger.info(f"Attendance recorded for user {user_id} with confidence {confidence:.3f}")
+                else:
+                    logger.info(f"User {user_id} already has attendance for today")
+                    
+        except Exception as e:
+            logger.error(f"Failed to record attendance: {e}")
+    
+    def _fallback_to_sequential_processing(self, image, session_id, user_id):
+        """Fallback to original sequential processing if enhanced system fails"""
+        logger.info("Falling back to sequential processing")
+        return self.process_frame_sequential(image, session_id, user_id)
         """
         Sequential frame processing: Phase 1 (Anti-Spoofing) → Phase 2 (Face Recognition)
         """
@@ -2616,6 +2869,67 @@ def create_optimized_app(config: SystemConfig = None):
         return jsonify(stats)
     
     # Cache cleanup endpoint
+    @app.route('/api/process-frame-step1', methods=['POST'])
+    def process_frame_step1():
+        """
+        Enhanced Anti-Spoofing Processing Endpoint (Step 1 Implementation)
+        
+        This endpoint implements the Step 1 requirements from yangIni.md:
+        - Real-time face anti-spoofing detection that runs BEFORE attendance checking
+        - Multiple anti-spoofing techniques simultaneously  
+        - Challenge-response system integration
+        - Progress indicators and confidence thresholds
+        """
+        try:
+            session_id = request.form.get('session_id', str(secrets.token_hex(8)))
+            user_id = request.form.get('user_id')
+            
+            # Get image data
+            image_data = request.files.get('image')
+            if not image_data:
+                return jsonify({
+                    'error': 'No image provided',
+                    'session_id': session_id,
+                    'implementation': 'enhanced_antispoofing_step1'
+                })
+            
+            # Convert image
+            try:
+                import numpy as np
+                from PIL import Image
+                
+                image = Image.open(image_data.stream)
+                image_array = np.array(image)
+                
+                # Convert RGB to BGR for OpenCV
+                if len(image_array.shape) == 3 and image_array.shape[2] == 3:
+                    image_array = cv2.cvtColor(image_array, cv2.COLOR_RGB2BGR)
+                
+            except Exception as e:
+                return jsonify({
+                    'error': f'Image processing failed: {str(e)}',
+                    'session_id': session_id,
+                    'implementation': 'enhanced_antispoofing_step1'
+                })
+            
+            # Process using enhanced anti-spoofing system
+            if hasattr(processor, 'use_enhanced_antispoofing') and processor.use_enhanced_antispoofing:
+                result = processor.process_frame_enhanced_antispoofing(image_array, session_id, user_id)
+            else:
+                # Fallback to sequential processing
+                result = processor.process_frame_sequential(image_array, session_id, user_id)
+                result['implementation'] = 'fallback_sequential'
+            
+            return jsonify(result)
+            
+        except Exception as e:
+            print(f"Step 1 processing endpoint error: {e}")
+            return jsonify({
+                'error': f'Processing failed: {str(e)}',
+                'session_id': session_id if 'session_id' in locals() else 'unknown',
+                'implementation': 'enhanced_antispoofing_step1'
+            })
+
     @app.route('/api/cleanup-cache')
     def cleanup_cache():
         frame_processor.cleanup_cache()
@@ -3031,6 +3345,13 @@ def register_optimized_routes(app, logger):
         }
         
         return render_template('attendance.html', user=user_data)
+    
+    @app.route('/enhanced-antispoofing-test')
+    def enhanced_antispoofing_test():
+        """
+        Test page for Enhanced Anti-Spoofing System (Step 1 Implementation)
+        """
+        return render_template('enhanced_antispoofing_test.html')
     
     @app.route('/attendance-sequential')
     def attendance_sequential():
