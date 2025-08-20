@@ -3,10 +3,11 @@
 ## Quick Installation on New Device
 
 ### Method 1: Automatic Setup (Recommended)
+
 ```bash
 # 1. Download/copy these files to the new device:
 # - setup_step3.py
-# - requirements_step3_minimal.txt 
+# - requirements_step3_minimal.txt
 # - All src/ folder contents
 
 # 2. Run the setup script:
@@ -18,6 +19,7 @@ python setup_step3.py
 ### Method 2: Manual Installation
 
 #### Prerequisites
+
 - Python 3.8 or higher
 - Webcam/camera access
 - Audio output (speakers/headphones)
@@ -25,6 +27,7 @@ python setup_step3.py
 #### Step-by-Step Installation
 
 1. **Create virtual environment (recommended):**
+
 ```bash
 python -m venv .venv
 
@@ -36,6 +39,7 @@ source .venv/bin/activate
 ```
 
 2. **Install essential packages:**
+
 ```bash
 # Upgrade pip first
 python -m pip install --upgrade pip
@@ -45,6 +49,7 @@ pip install -r requirements_step3_minimal.txt
 ```
 
 3. **Or install manually:**
+
 ```bash
 # Core AI/Computer Vision
 pip install torch>=2.0.0 --index-url https://download.pytorch.org/whl/cpu
@@ -68,6 +73,7 @@ pip install scikit-learn>=1.3.0
 ### Files to Copy to New Device
 
 **Essential Files:**
+
 ```
 📁 src/
 ├── 📁 challenge/
@@ -97,6 +103,7 @@ pip install scikit-learn>=1.3.0
 ### Verification
 
 **Test imports:**
+
 ```python
 python -c "
 import cv2, mediapipe, torch, numpy
@@ -106,6 +113,7 @@ print('✅ All packages imported successfully!')
 ```
 
 **Test camera:**
+
 ```python
 python -c "
 import cv2
@@ -117,6 +125,7 @@ print('✅ Camera working!' if ret else '❌ Camera not working')
 ```
 
 **Test audio:**
+
 ```python
 python -c "
 import pygame; pygame.mixer.init()
@@ -128,11 +137,13 @@ print('✅ Audio system working!')
 ### Running the System
 
 **Test Step 3 features:**
+
 ```bash
 python test_step3_enhanced_challenges.py
 ```
 
 **Run web interface:**
+
 ```bash
 python -m src.web.app
 # Then open: http://localhost:5000
@@ -143,17 +154,20 @@ python -m src.web.app
 **Common Issues:**
 
 1. **NumPy version conflicts:**
+
 ```bash
 pip install "numpy>=1.24.0,<2.0.0"
 ```
 
 2. **MediaPipe issues:**
+
 ```bash
 pip uninstall mediapipe
 pip install mediapipe==0.10.0
 ```
 
 3. **Audio not working:**
+
 ```bash
 # Try alternative pygame installation
 pip uninstall pygame
@@ -164,11 +178,13 @@ sudo apt-get install espeak espeak-data libespeak-dev
 ```
 
 4. **Camera access issues:**
+
    - Check camera permissions
    - Try different camera indices (0, 1, 2...)
    - Ensure no other apps are using the camera
 
 5. **PyTorch issues:**
+
 ```bash
 # For CPU-only installation
 pip install torch>=2.0.0 --index-url https://download.pytorch.org/whl/cpu
@@ -177,12 +193,14 @@ pip install torch>=2.0.0 --index-url https://download.pytorch.org/whl/cpu
 ### System Requirements
 
 **Minimum:**
+
 - Python 3.8+
 - 4GB RAM
 - Webcam
 - Audio output
 
 **Recommended:**
+
 - Python 3.9+
 - 8GB RAM
 - Good quality webcam
@@ -191,6 +209,7 @@ pip install torch>=2.0.0 --index-url https://download.pytorch.org/whl/cpu
 ### Features Available After Installation
 
 ✅ **Step 3 Enhanced Challenge System:**
+
 - Distance challenges (move closer/farther)
 - Audio feedback with success/failure sounds
 - Text-to-speech voice instructions
@@ -202,6 +221,7 @@ pip install torch>=2.0.0 --index-url https://download.pytorch.org/whl/cpu
 ### Next Steps
 
 After successful installation:
+
 1. Test the challenge system
 2. Customize audio settings if needed
 3. Proceed to Step 4 implementation
