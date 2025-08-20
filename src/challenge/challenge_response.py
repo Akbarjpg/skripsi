@@ -35,8 +35,7 @@ class ChallengeType(Enum):
     """Enhanced enum untuk tipe-tipe challenge anti-spoofing"""
     BLINK = "blink"
     MOUTH_OPEN = "mouth_open"
-    SMILE = "smile"  # NEW: Proper smile detection
-    HEAD_MOVEMENT = "head_movement"  # CONSOLIDATED: All head directions
+    HEAD_MOVEMENT = "head_movement"  # NEW: Head movement detection (up/down, left/right)
     SEQUENCE = "sequence"
     # NEW: Anti-spoofing specific challenges
     COVER_EYE = "cover_eye"
@@ -430,36 +429,39 @@ class BlinkChallenge(Challenge):
         return np.mean(confidence_factors) if confidence_factors else 0.0
 
 
-class SmileChallenge(Challenge):
-    """Enhanced smile challenge dengan proper smile detection dan anti-spoofing"""
+class HeadMovementChallenge(Challenge):
+    """Enhanced head movement challenge with proper pose detection and anti-spoofing"""
     
-    def __init__(self, challenge_id: str, required_smiles: int = 2,
+    def __init__(self, challenge_id: str, required_movements: int = 3,
                  difficulty: ChallengeDifficulty = ChallengeDifficulty.MEDIUM,
                  duration: float = 15.0):
         super().__init__(
             challenge_id,
-            ChallengeType.SMILE,
+            ChallengeType.HEAD_MOVEMENT,
             difficulty,
             duration,
-            f"Senyum natural {required_smiles} kali (dalam {duration:.0f} detik)"
+            f"Gerakan kepala alami {required_movements} kali (kiri/kanan, atas/bawah) dalam {duration:.0f} detik"
         )
-        self.required_smiles = required_smiles
-        self.detected_smiles = 0
-        self.last_smile_time = None
-        self.smile_intervals = []
-        self.mouth_ratio_history = deque(maxlen=30)  # Track mouth aspect ratio
-        self.baseline_mouth_ratio = None
+        self.required_movements = required_movements
+        self.detected_movements = 0
+        self.last_movement_time = None
+        self.movement_history = []
+        self.pose_history = deque(maxlen=30)  # Track head pose history
+        self.baseline_pose = None
         
         # Anti-spoofing thresholds
-        self.min_smile_interval = 1.0  # Minimum time between natural smiles
-        self.max_smile_interval = 8.0  # Maximum time for responsive smiling
-        self.smile_threshold = 0.15  # Minimum mouth ratio increase for smile
-        self.smile_duration_min = 0.5  # Minimum duration for natural smile
-        self.smile_duration_max = 3.0  # Maximum duration for natural smile
+        self.min_movement_interval = 0.8  # Minimum time between movements
+        self.max_movement_interval = 8.0  # Maximum time for responsive movement
+        self.movement_threshold = 15.0    # Minimum angle change for movement (degrees)
+        self.movement_duration_min = 0.3  # Minimum duration for movement
+        self.movement_duration_max = 2.5  # Maximum duration for movement
         
         # State tracking
-        self.current_smile_start = None
-        self.is_currently_smiling = False
+        self.current_movement_start = None
+        self.is_currently_moving = False
+        self.last_pose = None
+        self.movement_directions = ['left', 'right', 'up', 'down']
+        self.detected_directions = set()
         
     def _process_specific_response(self, detection_results: Dict) -> bool:
         if not detection_results.get('landmarks_detected', False):
@@ -468,33 +470,39 @@ class SmileChallenge(Challenge):
         current_time = time.time()
         landmarks = detection_results.get('landmarks', [])
         
-        # Calculate mouth aspect ratio for smile detection
-        mouth_ratio = self._calculate_mouth_aspect_ratio(landmarks)
-        if mouth_ratio is None:
+        # Calculate head pose angles
+        pose_angles = self._calculate_head_pose(landmarks)
+        if pose_angles is None:
             return False
         
-        self.mouth_ratio_history.append(mouth_ratio)
+        self.pose_history.append(pose_angles)
         
         # Establish baseline if not set
-        if self.baseline_mouth_ratio is None and len(self.mouth_ratio_history) >= 10:
-            # Use median of first samples as baseline (neutral expression)
-            self.baseline_mouth_ratio = np.median(list(self.mouth_ratio_history)[:10])
+        if self.baseline_pose is None and len(self.pose_history) >= 10:
+            # Use median of first samples as baseline (neutral position)
+            poses = list(self.pose_history)[:10]
+            self.baseline_pose = {
+                'yaw': np.median([p['yaw'] for p in poses]),
+                'pitch': np.median([p['pitch'] for p in poses]),
+                'roll': np.median([p['roll'] for p in poses])
+            }
         
-        # Detect smile state
-        if self.baseline_mouth_ratio is not None:
-            smile_detected = self._detect_smile_state(mouth_ratio, current_time)
+        # Detect movement
+        if self.baseline_pose is not None:
+            movement_detected = self._detect_movement_state(pose_angles, current_time)
             
-            if smile_detected and self.detected_smiles < self.required_smiles:
-                self.detected_smiles += 1
-                print(f"Natural smile detected! Count: {self.detected_smiles}/{self.required_smiles}")
+            if movement_detected and self.detected_movements < self.required_movements:
+                self.detected_movements += 1
+                print(f"Natural head movement detected! Count: {self.detected_movements}/{self.required_movements}")
         
         # Store response data
         self.response_data.append({
             'timestamp': current_time,
-            'mouth_ratio': mouth_ratio,
-            'baseline_ratio': self.baseline_mouth_ratio,
-            'is_smiling': self.is_currently_smiling,
-            'detected_smiles': self.detected_smiles
+            'pose_angles': pose_angles,
+            'baseline_pose': self.baseline_pose,
+            'is_moving': self.is_currently_moving,
+            'detected_movements': self.detected_movements,
+            'detected_directions': list(self.detected_directions)
         })
         
         # Update quality metrics
@@ -502,8 +510,8 @@ class SmileChallenge(Challenge):
         self.quality_metrics.append(quality)
         
         # Check success
-        if self.detected_smiles >= self.required_smiles:
-            self.success = self._validate_overall_smile_pattern()
+        if self.detected_movements >= self.required_movements:
+            self.success = self._validate_overall_movement_pattern()
             self.completed = True
             return True
             
@@ -514,101 +522,172 @@ class SmileChallenge(Challenge):
             
         return False
     
-    def _calculate_mouth_aspect_ratio(self, landmarks) -> Optional[float]:
-        """Calculate mouth aspect ratio for smile detection"""
+    def _calculate_head_pose(self, landmarks) -> Optional[Dict[str, float]]:
+        """Calculate head pose angles (yaw, pitch, roll) from landmarks"""
         if len(landmarks) < 468:
             return None
         
         try:
-            # MediaPipe mouth landmark indices
-            # Mouth corners: 61 (left), 291 (right)  
-            # Upper lip: 13, 14, 15
-            # Lower lip: 17, 18, 19
-            left_corner = landmarks[61]   # Left mouth corner
-            right_corner = landmarks[291] # Right mouth corner
-            upper_center = landmarks[13]  # Upper lip center
-            lower_center = landmarks[17]  # Lower lip center
+            # Key facial landmarks for pose estimation
+            # Nose tip: 1
+            # Chin: 152
+            # Left eye corner: 33
+            # Right eye corner: 263
+            # Left mouth corner: 61
+            # Right mouth corner: 291
             
-            # Calculate mouth width and height
-            mouth_width = np.linalg.norm(
-                np.array([right_corner.x, right_corner.y]) - 
-                np.array([left_corner.x, left_corner.y])
-            )
+            nose_tip = landmarks[1]
+            chin = landmarks[152]
+            left_eye = landmarks[33]
+            right_eye = landmarks[263]
+            left_mouth = landmarks[61]
+            right_mouth = landmarks[291]
             
-            mouth_height = np.linalg.norm(
-                np.array([upper_center.x, upper_center.y]) - 
-                np.array([lower_center.x, lower_center.y])
-            )
+            # Convert to numpy arrays
+            nose = np.array([nose_tip.x, nose_tip.y, nose_tip.z])
+            chin_point = np.array([chin.x, chin.y, chin.z])
+            left_eye_point = np.array([left_eye.x, left_eye.y, left_eye.z])
+            right_eye_point = np.array([right_eye.x, right_eye.y, right_eye.z])
+            left_mouth_point = np.array([left_mouth.x, left_mouth.y, left_mouth.z])
+            right_mouth_point = np.array([right_mouth.x, right_mouth.y, right_mouth.z])
             
-            # Avoid division by zero
-            if mouth_height == 0:
-                return 0.0
-                
-            # Mouth aspect ratio (MAR) - width/height ratio increases when smiling
-            mar = mouth_width / mouth_height
-            return mar
+            # Calculate eye center
+            eye_center = (left_eye_point + right_eye_point) / 2
             
-        except (IndexError, AttributeError) as e:
+            # Calculate mouth center
+            mouth_center = (left_mouth_point + right_mouth_point) / 2
+            
+            # Calculate yaw (left-right rotation)
+            eye_vector = right_eye_point - left_eye_point
+            yaw = np.arctan2(eye_vector[0], abs(eye_vector[2])) * 180 / np.pi
+            
+            # Calculate pitch (up-down rotation)
+            face_vector = eye_center - mouth_center
+            pitch = np.arctan2(face_vector[1], abs(face_vector[2])) * 180 / np.pi
+            
+            # Calculate roll (tilt)
+            roll = np.arctan2(eye_vector[1], eye_vector[0]) * 180 / np.pi
+            
+            return {
+                'yaw': float(yaw),      # Left-right: negative = left, positive = right
+                'pitch': float(pitch),  # Up-down: negative = down, positive = up
+                'roll': float(roll)     # Tilt: negative = left tilt, positive = right tilt
+            }
+            
+        except (IndexError, AttributeError, ZeroDivisionError) as e:
             return None
     
-    def _detect_smile_state(self, current_ratio: float, current_time: float) -> bool:
-        """Detect smile state changes and validate natural smiling"""
+    def _detect_movement_state(self, current_pose: Dict[str, float], current_time: float) -> bool:
+        """Detect head movement state changes and validate natural movement"""
         
-        ratio_increase = current_ratio - self.baseline_mouth_ratio
-        is_smiling_now = ratio_increase > self.smile_threshold
+        if self.baseline_pose is None:
+            return False
         
-        # Detect smile start
-        if is_smiling_now and not self.is_currently_smiling:
-            self.current_smile_start = current_time
-            self.is_currently_smiling = True
-            return False  # Don't count until smile ends
+        # Calculate angle differences from baseline
+        yaw_diff = abs(current_pose['yaw'] - self.baseline_pose['yaw'])
+        pitch_diff = abs(current_pose['pitch'] - self.baseline_pose['pitch'])
         
-        # Detect smile end
-        elif not is_smiling_now and self.is_currently_smiling:
-            if self.current_smile_start is not None:
-                smile_duration = current_time - self.current_smile_start
+        # Determine if significant movement is occurring
+        is_moving_now = (yaw_diff > self.movement_threshold or 
+                        pitch_diff > self.movement_threshold)
+        
+        # Detect movement start
+        if is_moving_now and not self.is_currently_moving:
+            self.current_movement_start = current_time
+            self.is_currently_moving = True
+            self.last_pose = current_pose.copy()
+            return False  # Don't count until movement ends
+        
+        # Detect movement end
+        elif not is_moving_now and self.is_currently_moving:
+            if self.current_movement_start is not None and self.last_pose is not None:
+                movement_duration = current_time - self.current_movement_start
                 
-                # Validate smile duration and interval
-                if self._validate_smile_quality(smile_duration, current_time):
-                    self.last_smile_time = current_time
-                    self.smile_intervals.append(
-                        current_time - (self.last_smile_time or current_time)
-                    )
-                    self.is_currently_smiling = False
-                    return True  # Valid smile completed
+                # Validate movement quality and determine direction
+                movement_direction = self._determine_movement_direction(self.last_pose, current_pose)
+                
+                if (self._validate_movement_quality(movement_duration, current_time) and 
+                    movement_direction is not None):
+                    
+                    self.last_movement_time = current_time
+                    self.movement_history.append({
+                        'direction': movement_direction,
+                        'duration': movement_duration,
+                        'timestamp': current_time
+                    })
+                    self.detected_directions.add(movement_direction)
+                    self.is_currently_moving = False
+                    return True  # Valid movement completed
             
-            self.is_currently_smiling = False
+            self.is_currently_moving = False
         
         return False
     
-    def _validate_smile_quality(self, duration: float, current_time: float) -> bool:
-        """Validate if the smile is natural and intentional"""
+    def _determine_movement_direction(self, start_pose: Dict[str, float], 
+                                    end_pose: Dict[str, float]) -> Optional[str]:
+        """Determine the primary direction of head movement"""
         
-        # Check smile duration
-        if duration < self.smile_duration_min or duration > self.smile_duration_max:
+        yaw_change = end_pose['yaw'] - start_pose['yaw']
+        pitch_change = end_pose['pitch'] - start_pose['pitch']
+        
+        # Determine primary movement direction
+        if abs(yaw_change) > abs(pitch_change):
+            # Horizontal movement
+            if yaw_change > self.movement_threshold:
+                return 'right'
+            elif yaw_change < -self.movement_threshold:
+                return 'left'
+        else:
+            # Vertical movement
+            if pitch_change > self.movement_threshold:
+                return 'up'
+            elif pitch_change < -self.movement_threshold:
+                return 'down'
+        
+        return None
+    
+    def _validate_movement_quality(self, duration: float, current_time: float) -> bool:
+        """Validate if the movement is natural and intentional"""
+        
+        # Check movement duration
+        if duration < self.movement_duration_min or duration > self.movement_duration_max:
             return False
         
-        # Check interval between smiles
-        if (self.last_smile_time is not None and 
-            current_time - self.last_smile_time < self.min_smile_interval):
+        # Check interval between movements
+        if (self.last_movement_time is not None and 
+            current_time - self.last_movement_time < self.min_movement_interval):
             return False
         
         return True
     
-    def _validate_overall_smile_pattern(self) -> bool:
-        """Validate overall smiling pattern for anti-spoofing"""
-        if len(self.smile_intervals) < 2:
+    def _validate_overall_movement_pattern(self) -> bool:
+        """Validate overall movement pattern for anti-spoofing"""
+        if len(self.movement_history) < 2:
             return True  # Not enough data to validate
         
-        # Check for reasonable timing variation (not too mechanical)
-        interval_variance = np.var(self.smile_intervals)
-        if interval_variance < 0.2:  # Too regular
+        # Check for direction diversity (should have different directions)
+        unique_directions = len(self.detected_directions)
+        if unique_directions < min(2, self.required_movements):
             return False
         
-        # Check for reasonable average interval
-        avg_interval = np.mean(self.smile_intervals)
-        if avg_interval < self.min_smile_interval or avg_interval > self.max_smile_interval:
-            return False
+        # Check for reasonable timing variation (not too mechanical)
+        durations = [m['duration'] for m in self.movement_history]
+        if len(durations) > 1:
+            duration_variance = np.var(durations)
+            if duration_variance < 0.1:  # Too regular
+                return False
+        
+        # Check for reasonable average timing
+        intervals = []
+        for i in range(1, len(self.movement_history)):
+            interval = (self.movement_history[i]['timestamp'] - 
+                       self.movement_history[i-1]['timestamp'])
+            intervals.append(interval)
+        
+        if intervals:
+            avg_interval = np.mean(intervals)
+            if avg_interval < self.min_movement_interval or avg_interval > self.max_movement_interval:
+                return False
         
         return True
     
@@ -618,22 +697,22 @@ class SmileChallenge(Challenge):
             
         confidence_factors = []
         
-        # Mouth ratio variation quality
-        if len(self.mouth_ratio_history) > 10:
-            ratios = list(self.mouth_ratio_history)
-            ratio_range = max(ratios) - min(ratios)
-            variation_factor = min(1.0, ratio_range / 0.3)  # Normalize to expected range
-            confidence_factors.append(variation_factor)
+        # Movement diversity quality
+        direction_diversity = len(self.detected_directions) / len(self.movement_directions)
+        confidence_factors.append(direction_diversity)
         
-        # Smile timing naturalness
-        if len(self.smile_intervals) > 1:
-            interval_variance = np.var(self.smile_intervals)
-            timing_factor = min(1.0, interval_variance / 1.0)  # Reward natural variation
+        # Movement timing naturalness
+        if len(self.movement_history) > 1:
+            durations = [m['duration'] for m in self.movement_history]
+            duration_variance = np.var(durations)
+            # Natural variance in timing
+            timing_factor = min(1.0, duration_variance / 0.3)
             confidence_factors.append(timing_factor)
         
-        # Response completeness
-        completion_factor = min(1.0, self.detected_smiles / self.required_smiles)
-        confidence_factors.append(completion_factor)
+        # Overall detection quality
+        if self.quality_metrics:
+            avg_quality = np.mean(self.quality_metrics)
+            confidence_factors.append(avg_quality)
         
         return np.mean(confidence_factors) if confidence_factors else 0.0
 
@@ -641,11 +720,13 @@ class SmileChallenge(Challenge):
 class MouthOpenChallenge(Challenge):
     """Challenge untuk membuka mulut"""
     
-    def __init__(self, challenge_id: str, duration: float = 3.0, 
-                 open_threshold: float = 0.6, min_open_time: float = 1.0):
+    def __init__(self, challenge_id: str, min_open_time: float = 1.0,
+                 difficulty: ChallengeDifficulty = ChallengeDifficulty.MEDIUM,
+                 duration: float = 15.0, open_threshold: float = 0.6):
         super().__init__(
             challenge_id,
             ChallengeType.MOUTH_OPEN,
+            difficulty,
             duration,
             f"Buka mulut selama {min_open_time} detik"
         )
@@ -703,191 +784,6 @@ class MouthOpenChallenge(Challenge):
         confidence = min(1.0, max_mar / 1.0)  # Normalize to max expected MAR
         return confidence
 
-class HeadMovementChallenge(Challenge):
-    """Enhanced head movement challenge dengan direction classification"""
-    
-    def __init__(self, challenge_id: str, required_directions: List[str] = None,
-                 difficulty: ChallengeDifficulty = ChallengeDifficulty.MEDIUM,
-                 duration: float = 20.0):
-        if required_directions is None:
-            required_directions = ['left', 'right', 'up', 'down']
-        
-        super().__init__(
-            challenge_id,
-            ChallengeType.HEAD_MOVEMENT,
-            difficulty,
-            duration,
-            f"Gerakkan kepala ke: {', '.join(required_directions)} (dalam {duration:.0f} detik)"
-        )
-        self.required_directions = required_directions
-        self.completed_directions = set()
-        self.head_positions = deque(maxlen=50)  # Track head position history
-        self.baseline_position = None
-        self.current_direction = None
-        self.direction_start_time = None
-        
-        # Movement thresholds
-        self.movement_threshold = 15.0  # Degrees for direction classification
-        self.min_movement_duration = 1.0  # Minimum time in direction
-        self.max_return_time = 3.0  # Maximum time to return to center
-        
-        # Direction tracking
-        self.direction_history = []
-        self.last_direction_time = None
-        
-    def _process_specific_response(self, detection_results: Dict) -> bool:
-        if not detection_results.get('landmarks_detected', False):
-            return False
-            
-        current_time = time.time()
-        
-        # Get head pose angles
-        pitch = detection_results.get('head_pitch', 0)
-        yaw = detection_results.get('head_yaw', 0)
-        roll = detection_results.get('head_roll', 0)
-        
-        # Store current position
-        position = {'pitch': pitch, 'yaw': yaw, 'roll': roll, 'time': current_time}
-        self.head_positions.append(position)
-        
-        # Establish baseline if not set
-        if self.baseline_position is None and len(self.head_positions) >= 10:
-            positions = list(self.head_positions)[:10]
-            self.baseline_position = {
-                'pitch': np.mean([p['pitch'] for p in positions]),
-                'yaw': np.mean([p['yaw'] for p in positions]),
-                'roll': np.mean([p['roll'] for p in positions])
-            }
-        
-        # Detect direction if baseline is established
-        if self.baseline_position is not None:
-            direction = self._classify_head_direction(pitch, yaw)
-            self._process_direction_change(direction, current_time)
-        
-        # Store response data
-        self.response_data.append({
-            'timestamp': current_time,
-            'pitch': pitch,
-            'yaw': yaw,
-            'roll': roll,
-            'direction': self.current_direction,
-            'completed_directions': list(self.completed_directions)
-        })
-        
-        # Update quality metrics
-        quality = self._assess_detection_quality(detection_results)
-        self.quality_metrics.append(quality)
-        
-        # Check success
-        if len(self.completed_directions) >= len(self.required_directions):
-            self.success = self._validate_movement_pattern()
-            self.completed = True
-            return True
-            
-        # Check timeout
-        if self.is_expired():
-            self.completed = True
-            return True
-            
-        return False
-    
-    def _classify_head_direction(self, pitch: float, yaw: float) -> Optional[str]:
-        """Classify head direction based on pitch and yaw angles"""
-        if self.baseline_position is None:
-            return None
-        
-        pitch_diff = pitch - self.baseline_position['pitch']
-        yaw_diff = yaw - self.baseline_position['yaw']
-        
-        # Determine primary movement direction
-        if abs(pitch_diff) > self.movement_threshold or abs(yaw_diff) > self.movement_threshold:
-            if abs(pitch_diff) > abs(yaw_diff):
-                # Vertical movement dominant
-                return 'up' if pitch_diff > 0 else 'down'
-            else:
-                # Horizontal movement dominant  
-                return 'right' if yaw_diff > 0 else 'left'
-        
-        return 'center'  # Near baseline position
-    
-    def _process_direction_change(self, direction: str, current_time: float):
-        """Process head direction changes and validate movements"""
-        
-        # Direction change detected
-        if direction != self.current_direction:
-            # Complete previous direction if it was valid
-            if (self.current_direction is not None and 
-                self.current_direction != 'center' and
-                self.direction_start_time is not None):
-                
-                duration = current_time - self.direction_start_time
-                if duration >= self.min_movement_duration:
-                    # Valid movement completed
-                    if self.current_direction in self.required_directions:
-                        if self.current_direction not in self.completed_directions:
-                            self.completed_directions.add(self.current_direction)
-                            print(f"Direction completed: {self.current_direction}")
-                            print(f"Progress: {len(self.completed_directions)}/{len(self.required_directions)}")
-            
-            # Start tracking new direction
-            self.current_direction = direction
-            self.direction_start_time = current_time
-            self.direction_history.append({
-                'direction': direction,
-                'start_time': current_time
-            })
-    
-    def _validate_movement_pattern(self) -> bool:
-        """Validate movement pattern for anti-spoofing"""
-        if len(self.direction_history) < len(self.required_directions):
-            return False
-        
-        # Check for natural movement timing
-        direction_durations = []
-        for i, entry in enumerate(self.direction_history):
-            if i < len(self.direction_history) - 1:
-                duration = self.direction_history[i + 1]['start_time'] - entry['start_time']
-                direction_durations.append(duration)
-        
-        if direction_durations:
-            # Check for reasonable variation in timing (not too mechanical)
-            duration_variance = np.var(direction_durations)
-            if duration_variance < 0.3:  # Too regular
-                return False
-        
-        # Ensure all required directions were completed
-        return all(direction in self.completed_directions for direction in self.required_directions)
-    
-    def _calculate_confidence(self) -> float:
-        if not self.success or len(self.response_data) == 0:
-            return 0.0
-            
-        confidence_factors = []
-        
-        # Movement range quality
-        if len(self.head_positions) > 20:
-            positions = list(self.head_positions)
-            pitch_range = max(p['pitch'] for p in positions) - min(p['pitch'] for p in positions)
-            yaw_range = max(p['yaw'] for p in positions) - min(p['yaw'] for p in positions)
-            
-            # Reward sufficient movement range
-            range_factor = min(1.0, (pitch_range + yaw_range) / 60.0)  # Expected ~30° range each
-            confidence_factors.append(range_factor)
-        
-        # Direction completion
-        completion_factor = len(self.completed_directions) / len(self.required_directions)
-        confidence_factors.append(completion_factor)
-        
-        # Movement naturalness (if enough data)
-        if len(self.direction_history) > 2:
-            timing_variance = np.var([
-                self.direction_history[i + 1]['start_time'] - entry['start_time']
-                for i, entry in enumerate(self.direction_history[:-1])
-            ])
-            naturalness_factor = min(1.0, timing_variance / 2.0)  # Reward natural variation
-            confidence_factors.append(naturalness_factor)
-        
-        return np.mean(confidence_factors) if confidence_factors else 0.0
 
 class SequenceChallenge(Challenge):
     """Enhanced sequence challenge dengan improved step validation"""
@@ -970,7 +866,7 @@ class SequenceChallenge(Challenge):
             blink_count = detection_results.get('blink_count', 0)
             return blink_count > len([r for r in self.step_results if r.get('success', False)])
             
-        elif current_challenge_type == ChallengeType.SMILE:
+        elif current_challenge_type == ChallengeType.HEAD_MOVEMENT:
             # Check for smile indicators (MAR or other facial features)
             landmarks = detection_results.get('landmarks', [])
             if landmarks and len(landmarks) >= 468:
@@ -1070,7 +966,6 @@ class ChallengeResponseSystem:
         # Enhanced challenge types with anti-spoofing focus
         challenge_types = [
             ChallengeType.BLINK,
-            ChallengeType.SMILE,
             ChallengeType.HEAD_MOVEMENT,
             ChallengeType.MOUTH_OPEN,
         ]
@@ -1098,22 +993,13 @@ class ChallengeResponseSystem:
             required_blinks = 2 if difficulty == ChallengeDifficulty.EASY else (3 if difficulty == ChallengeDifficulty.MEDIUM else 4)
             challenge = BlinkChallenge(challenge_id, required_blinks=required_blinks, difficulty=difficulty)
             
-        elif challenge_type == ChallengeType.SMILE:
-            required_smiles = 1 if difficulty == ChallengeDifficulty.EASY else (2 if difficulty == ChallengeDifficulty.MEDIUM else 3)
-            challenge = SmileChallenge(challenge_id, required_smiles=required_smiles, difficulty=difficulty)
-            
         elif challenge_type == ChallengeType.HEAD_MOVEMENT:
-            if difficulty == ChallengeDifficulty.EASY:
-                directions = ['left', 'right']
-            elif difficulty == ChallengeDifficulty.MEDIUM:
-                directions = ['left', 'right', 'up', 'down']
-            else:  # HARD
-                directions = ['left', 'right', 'up', 'down']
-            challenge = HeadMovementChallenge(challenge_id, required_directions=directions, difficulty=difficulty)
+            required_movements = 2 if difficulty == ChallengeDifficulty.EASY else (3 if difficulty == ChallengeDifficulty.MEDIUM else 4)
+            challenge = HeadMovementChallenge(challenge_id, required_movements=required_movements, difficulty=difficulty)
             
         elif challenge_type == ChallengeType.MOUTH_OPEN:
             min_open_time = 1.0 if difficulty == ChallengeDifficulty.EASY else (1.5 if difficulty == ChallengeDifficulty.MEDIUM else 2.0)
-            challenge = MouthOpenChallenge(challenge_id, min_open_time=min_open_time)
+            challenge = MouthOpenChallenge(challenge_id, min_open_time=min_open_time, difficulty=difficulty)
             
         # Distance challenges
         elif challenge_type == ChallengeType.MOVE_CLOSER and DISTANCE_CHALLENGE_AVAILABLE:
@@ -1144,7 +1030,6 @@ class ChallengeResponseSystem:
         """Generate enhanced sequence challenge"""
         available_types = [
             ChallengeType.BLINK,
-            ChallengeType.SMILE,
             ChallengeType.HEAD_MOVEMENT,
             ChallengeType.MOUTH_OPEN
         ]
@@ -1210,8 +1095,18 @@ class ChallengeResponseSystem:
             self.audio_system.play_challenge_start(challenge.description)
         
         print(f"\n🎯 New Challenge Started: {challenge.description}")
-        print(f"   Difficulty: {challenge.difficulty.value}")
-        print(f"   Duration: {challenge.duration:.1f}s")
+        # Handle both enum and non-enum difficulty values
+        difficulty_str = challenge.difficulty.value if hasattr(challenge.difficulty, 'value') else str(challenge.difficulty)
+        print(f"   Difficulty: {difficulty_str}")
+        # Handle both numeric and string duration values with robust error handling
+        try:
+            if isinstance(challenge.duration, (int, float)):
+                duration_str = f"{challenge.duration:.1f}s"
+            else:
+                duration_str = f"{float(challenge.duration):.1f}s"
+        except (ValueError, TypeError):
+            duration_str = "15.0s"  # fallback default
+        print(f"   Duration: {duration_str}")
         print(f"   Attempt: {self.current_attempt}/{self.max_attempts}")
         
         return challenge
