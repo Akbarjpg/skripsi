@@ -137,9 +137,9 @@ def test_camera():
         return False
 
 def test_audio():
-    """Test audio system"""
+    """Test audio system (voice disabled)"""
     print(f"\n{'='*60}")
-    print("🔊 TESTING AUDIO SYSTEM") 
+    print("🔊 TESTING AUDIO SYSTEM (Voice Disabled)") 
     print(f"{'='*60}")
     
     try:
@@ -147,10 +147,8 @@ def test_audio():
         pygame.mixer.init()
         print("✅ Pygame audio initialized")
         
-        import pyttsx3
-        engine = pyttsx3.init()
-        print("✅ Text-to-speech initialized")
-        engine.stop()
+        # Remove pyttsx3 test
+        print("ℹ️  Text-to-speech disabled by user preference")
         
         return True
     except Exception as e:

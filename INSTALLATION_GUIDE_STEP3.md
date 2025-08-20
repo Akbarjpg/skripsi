@@ -107,7 +107,7 @@ pip install scikit-learn>=1.3.0
 ```python
 python -c "
 import cv2, mediapipe, torch, numpy
-import pygame, pyttsx3, flask
+import pygame, flask
 print('✅ All packages imported successfully!')
 "
 ```
@@ -129,8 +129,7 @@ print('✅ Camera working!' if ret else '❌ Camera not working')
 ```python
 python -c "
 import pygame; pygame.mixer.init()
-import pyttsx3; engine = pyttsx3.init(); engine.stop()
-print('✅ Audio system working!')
+print('✅ Audio system working! (Voice disabled by user preference)')
 "
 ```
 

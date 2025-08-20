@@ -1,6 +1,6 @@
 """
 Audio Feedback System for Challenge-Response
-Implements success/failure sounds and voice instructions
+Implements success/failure sounds (voice instructions removed)
 """
 
 import os
@@ -20,14 +20,9 @@ except ImportError:
     PYGAME_AVAILABLE = False
     print("Warning: pygame not available. Audio feedback disabled.")
 
-try:
-    # Try to import pyttsx3 for text-to-speech
-    import pyttsx3
-    TTS_AVAILABLE = True
-except ImportError:
-    TTS_AVAILABLE = False
-    print("Warning: pyttsx3 not available. Voice instructions disabled.")
-
+# Remove pyttsx3 import and disable TTS
+TTS_AVAILABLE = False
+print("Voice instructions disabled by user preference.")
 
 class AudioType(Enum):
     """Types of audio feedback"""
@@ -38,39 +33,21 @@ class AudioType(Enum):
     PROGRESS = "progress"
     COUNTDOWN = "countdown"
 
-
 class AudioFeedbackSystem:
     """
     Handles audio feedback for challenge-response system
-    Supports both sound effects and text-to-speech instructions
+    Supports sound effects only (voice instructions removed)
     """
     
-    def __init__(self, audio_enabled: bool = True, voice_enabled: bool = True):
+    def __init__(self, audio_enabled: bool = True, voice_enabled: bool = False):
         self.audio_enabled = audio_enabled and PYGAME_AVAILABLE
-        self.voice_enabled = voice_enabled and TTS_AVAILABLE
+        self.voice_enabled = False  # Force disable voice
         
         # Audio queue for thread-safe playback
         self.audio_queue = queue.Queue()
-        self.voice_queue = queue.Queue()
         
-        # Initialize TTS engine
+        # Remove TTS engine initialization
         self.tts_engine = None
-        if self.voice_enabled:
-            try:
-                self.tts_engine = pyttsx3.init()
-                self.tts_engine.setProperty('rate', 150)  # Speaking rate
-                self.tts_engine.setProperty('volume', 0.8)  # Volume level
-                
-                # Get available voices and set to English if available
-                voices = self.tts_engine.getProperty('voices')
-                for voice in voices:
-                    if 'english' in voice.name.lower() or 'en' in voice.id.lower():
-                        self.tts_engine.setProperty('voice', voice.id)
-                        break
-                        
-            except Exception as e:
-                print(f"TTS initialization failed: {e}")
-                self.voice_enabled = False
         
         # Sound effects storage
         self.sounds = {}
@@ -81,10 +58,6 @@ class AudioFeedbackSystem:
         if self.audio_enabled:
             self.audio_thread = threading.Thread(target=self._audio_worker, daemon=True)
             self.audio_thread.start()
-        
-        if self.voice_enabled:
-            self.voice_thread = threading.Thread(target=self._voice_worker, daemon=True)
-            self.voice_thread.start()
     
     def _initialize_sounds(self):
         """Initialize or generate sound effects"""
@@ -225,20 +198,6 @@ class AudioFeedbackSystem:
             except Exception as e:
                 print(f"Audio playback error: {e}")
     
-    def _voice_worker(self):
-        """Background thread for voice synthesis"""
-        while self.running:
-            try:
-                text = self.voice_queue.get(timeout=1.0)
-                if self.tts_engine:
-                    self.tts_engine.say(text)
-                    self.tts_engine.runAndWait()
-                self.voice_queue.task_done()
-            except queue.Empty:
-                continue
-            except Exception as e:
-                print(f"Voice synthesis error: {e}")
-    
     def play_sound(self, audio_type: AudioType):
         """Play sound effect"""
         if self.audio_enabled:
@@ -248,45 +207,41 @@ class AudioFeedbackSystem:
                 pass  # Skip if queue is full
     
     def speak(self, text: str):
-        """Speak text using TTS"""
-        if self.voice_enabled:
-            try:
-                self.voice_queue.put_nowait(text)
-            except queue.Full:
-                pass  # Skip if queue is full
+        """Display text instead of speaking (voice disabled)"""
+        print(f"[INSTRUCTION]: {text}")
     
     def play_challenge_start(self, challenge_description: str):
-        """Play audio for challenge start"""
-        self.speak(f"New challenge: {challenge_description}")
+        """Play audio for challenge start (text only)"""
+        print(f"[CHALLENGE]: New challenge: {challenge_description}")
         self.play_sound(AudioType.INSTRUCTION)
     
     def play_challenge_success(self, challenge_type: str):
-        """Play audio for challenge success"""
-        self.speak(f"{challenge_type} challenge completed successfully!")
+        """Play audio for challenge success (text only)"""
+        print(f"[SUCCESS]: {challenge_type} challenge completed successfully!")
         self.play_sound(AudioType.SUCCESS)
     
     def play_challenge_failure(self, challenge_type: str, reason: str = ""):
-        """Play audio for challenge failure"""
+        """Play audio for challenge failure (text only)"""
         message = f"{challenge_type} challenge failed."
         if reason:
             message += f" {reason}"
-        self.speak(message)
+        print(f"[FAILURE]: {message}")
         self.play_sound(AudioType.FAILURE)
     
     def play_progress_update(self, progress_text: str):
-        """Play audio for progress update"""
-        self.speak(progress_text)
+        """Play audio for progress update (text only)"""
+        print(f"[PROGRESS]: {progress_text}")
         self.play_sound(AudioType.PROGRESS)
     
     def play_warning(self, warning_text: str):
-        """Play warning audio"""
-        self.speak(warning_text)
+        """Play warning audio (text only)"""
+        print(f"[WARNING]: {warning_text}")
         self.play_sound(AudioType.WARNING)
     
     def play_countdown(self, seconds_remaining: int):
-        """Play countdown audio"""
+        """Play countdown audio (text only)"""
         if seconds_remaining <= 5:
-            self.speak(f"{seconds_remaining}")
+            print(f"[COUNTDOWN]: {seconds_remaining}")
             self.play_sound(AudioType.COUNTDOWN)
     
     def set_audio_enabled(self, enabled: bool):
@@ -294,16 +249,16 @@ class AudioFeedbackSystem:
         self.audio_enabled = enabled and PYGAME_AVAILABLE
     
     def set_voice_enabled(self, enabled: bool):
-        """Enable/disable voice instructions"""
-        self.voice_enabled = enabled and TTS_AVAILABLE
+        """Voice instructions are disabled"""
+        self.voice_enabled = False
+        if enabled:
+            print("Voice instructions are disabled in this version.")
     
     def shutdown(self):
         """Shutdown audio system"""
         self.running = False
         if hasattr(self, 'audio_thread'):
             self.audio_thread.join(timeout=1.0)
-        if hasattr(self, 'voice_thread'):
-            self.voice_thread.join(timeout=1.0)
 
 
 # Enhanced Challenge Instructions

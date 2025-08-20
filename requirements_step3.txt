@@ -26,8 +26,8 @@ Pillow>=10.0.0
 # pygame for audio feedback (success/failure sounds)
 pygame>=2.5.0
 
-# pyttsx3 for text-to-speech voice instructions
-pyttsx3>=2.90
+# pyttsx3 for text-to-speech voice instructions - REMOVED (user preference)
+# pyttsx3>=2.90
 
 # ============================================================================
 # WEB FRAMEWORK DEPENDENCIES (FOR WEB INTERFACE)

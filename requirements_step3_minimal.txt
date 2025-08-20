@@ -7,9 +7,9 @@ opencv-python>=4.8.0
 mediapipe>=0.10.0
 numpy>=1.24.0,<2.0.0
 
-# Audio (essential for Step 3)
+# Audio (essential for Step 3) - Voice removed by user preference
 pygame>=2.5.0
-pyttsx3>=2.90
+# pyttsx3>=2.90  # REMOVED - voice functionality disabled
 
 # Web framework
 flask>=2.3.0

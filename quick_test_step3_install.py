@@ -104,9 +104,9 @@ def test_camera_quick():
         return False
 
 def test_audio_quick():
-    """Quick audio test"""
+    """Quick audio test (voice disabled)"""
     print(f"\n{'='*50}")
-    print("🔊 QUICK AUDIO TEST") 
+    print("🔊 QUICK AUDIO TEST (Voice Disabled)") 
     print("=" * 50)
     
     try:
@@ -114,10 +114,8 @@ def test_audio_quick():
         pygame.mixer.init()
         print("✅ Pygame audio initialized")
         
-        import pyttsx3
-        engine = pyttsx3.init()
-        engine.stop()
-        print("✅ Text-to-speech ready")
+        # Remove pyttsx3 test
+        print("ℹ️  Text-to-speech disabled by user preference")
         return True
         
     except Exception as e:
