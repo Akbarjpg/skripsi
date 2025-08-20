@@ -770,24 +770,27 @@
                   ></div>
                 </div>
                 <small id="challenge-timer">Waktu tersisa: --</small>
-                
+
                 <!-- Distance Challenge Progress -->
-                <div id="distance-progress" style="display: none; margin-top: 10px;">
-                  <div style="font-size: 14px; color: white;">
+                <div
+                  id="distance-progress"
+                  style="display: none; margin-top: 10px"
+                >
+                  <div style="font-size: 14px; color: white">
                     <span id="distance-status">Distance Status</span>
                   </div>
-                  <div style="font-size: 12px; opacity: 0.8;">
+                  <div style="font-size: 12px; opacity: 0.8">
                     <span id="distance-ratio">Current: --</span>
                   </div>
                 </div>
-                
+
                 <!-- Audio Controls -->
-                <div style="margin-top: 15px; text-align: center;">
-                  <button 
-                    class="btn btn-sm btn-outline-light" 
+                <div style="margin-top: 15px; text-align: center">
+                  <button
+                    class="btn btn-sm btn-outline-light"
                     id="audioToggleBtn"
                     onclick="toggleAudioFeedback()"
-                    style="border-radius: 20px;"
+                    style="border-radius: 20px"
                   >
                     🔊 Audio Instructions
                   </button>
@@ -984,7 +987,7 @@
               landmarkBadge.className = "status-badge status-passed";
             }
           }
-          
+
           // Update distance method if available
           if (data.distance_results && distanceMethod) {
             const distanceBadge = distanceMethod.querySelector(".status-badge");
@@ -1015,27 +1018,33 @@
             ).textContent = `Waktu tersisa: ${Math.ceil(
               data.challenge_info.time_remaining
             )}s`;
-            
+
             // Show distance progress if it's a distance challenge
-            const distanceProgress = document.getElementById("distance-progress");
+            const distanceProgress =
+              document.getElementById("distance-progress");
             const distanceStatus = document.getElementById("distance-status");
             const distanceRatio = document.getElementById("distance-ratio");
-            
-            if (data.challenge_info.challenge_type && 
-                (data.challenge_info.challenge_type.includes('distance') || 
-                 data.challenge_info.challenge_type.includes('move'))) {
-              
+
+            if (
+              data.challenge_info.challenge_type &&
+              (data.challenge_info.challenge_type.includes("distance") ||
+                data.challenge_info.challenge_type.includes("move"))
+            ) {
               distanceProgress.style.display = "block";
-              distanceStatus.textContent = data.challenge_info.status || "Moving...";
-              
+              distanceStatus.textContent =
+                data.challenge_info.status || "Moving...";
+
               if (data.challenge_info.distance_info) {
-                const ratio = data.challenge_info.distance_info.size_ratio || 1.0;
-                distanceRatio.textContent = `Current: ${(ratio * 100).toFixed(0)}%`;
+                const ratio =
+                  data.challenge_info.distance_info.size_ratio || 1.0;
+                distanceRatio.textContent = `Current: ${(ratio * 100).toFixed(
+                  0
+                )}%`;
               }
             } else {
               distanceProgress.style.display = "none";
             }
-            
+
             // Audio feedback for challenge updates
             if (audioEnabled && data.challenge_info.audio_message) {
               speakInstruction(data.challenge_info.audio_message);
@@ -1233,23 +1242,25 @@
           speakInstruction("Audio instructions enabled");
         }
       }
-      
+
       function toggleAudioFeedback() {
         audioEnabled = !audioEnabled;
         const toggle = document.getElementById("audioToggleBtn");
-        toggle.innerHTML = audioEnabled ? "🔊 Audio Instructions" : "🔇 Audio Off";
-        toggle.className = audioEnabled ? 
-          "btn btn-sm btn-outline-light" : 
-          "btn btn-sm btn-outline-secondary";
+        toggle.innerHTML = audioEnabled
+          ? "🔊 Audio Instructions"
+          : "🔇 Audio Off";
+        toggle.className = audioEnabled
+          ? "btn btn-sm btn-outline-light"
+          : "btn btn-sm btn-outline-secondary";
 
         if (audioEnabled) {
           speakInstruction("Audio feedback enabled");
         }
-        
+
         // Send audio preference to server
         if (window.sequentialDetection && window.sequentialDetection.socket) {
-          window.sequentialDetection.socket.emit('set_audio_enabled', {
-            audio_enabled: audioEnabled
+          window.sequentialDetection.socket.emit("set_audio_enabled", {
+            audio_enabled: audioEnabled,
           });
         }
       }
