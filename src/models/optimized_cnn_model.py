@@ -521,9 +521,263 @@ def benchmark_model(model, input_size=112, num_iterations=100):
     }
 
 
+# Additional optimization utilities
+class ModelPruner:
+    """
+    Model pruning utility for removing redundant neurons
+    """
+    
+    @staticmethod
+    def prune_model(model, sparsity=0.3):
+        """
+        Prune model to remove redundant connections
+        """
+        import torch.nn.utils.prune as prune
+        
+        # Prune convolutional layers
+        for module in model.modules():
+            if isinstance(module, nn.Conv2d):
+                prune.l1_unstructured(module, name='weight', amount=sparsity)
+            elif isinstance(module, nn.Linear):
+                prune.l1_unstructured(module, name='weight', amount=sparsity)
+        
+        return model
+    
+    @staticmethod
+    def remove_pruning(model):
+        """
+        Remove pruning masks to finalize the pruned model
+        """
+        import torch.nn.utils.prune as prune
+        
+        for module in model.modules():
+            if isinstance(module, (nn.Conv2d, nn.Linear)):
+                try:
+                    prune.remove(module, 'weight')
+                except:
+                    pass
+        
+        return model
+
+
+class ModelOptimizer:
+    """
+    Comprehensive model optimizer with multiple optimization techniques
+    """
+    
+    def __init__(self, config_path=None):
+        """
+        Initialize optimizer with configuration
+        """
+        self.config = self._load_config(config_path)
+        
+    def _load_config(self, config_path):
+        """
+        Load optimization configuration
+        """
+        if config_path:
+            import yaml
+            with open(config_path, 'r') as f:
+                return yaml.safe_load(f)
+        
+        # Default configuration
+        return {
+            'model_optimization': {
+                'cnn': {
+                    'use_quantization': True,
+                    'model_pruning': {'enabled': True, 'sparsity': 0.3},
+                    'onnx_export': {'enabled': True},
+                    'input_size': 112
+                }
+            }
+        }
+    
+    def optimize_model(self, model, model_path=None):
+        """
+        Apply comprehensive optimization to model
+        """
+        optimized_model = model
+        optimization_log = []
+        
+        # 1. Model Pruning
+        if self.config['model_optimization']['cnn']['model_pruning']['enabled']:
+            sparsity = self.config['model_optimization']['cnn']['model_pruning']['sparsity']
+            optimized_model = ModelPruner.prune_model(optimized_model, sparsity)
+            optimization_log.append(f"Applied pruning with {sparsity*100}% sparsity")
+        
+        # 2. Quantization
+        if self.config['model_optimization']['cnn']['use_quantization']:
+            optimized_model = torch.quantization.quantize_dynamic(
+                optimized_model, {nn.Linear, nn.Conv2d}, dtype=torch.qint8
+            )
+            optimization_log.append("Applied dynamic quantization")
+        
+        # 3. ONNX Export
+        if self.config['model_optimization']['cnn']['onnx_export']['enabled']:
+            self._export_to_onnx(optimized_model, model_path)
+            optimization_log.append("Exported to ONNX format")
+        
+        return optimized_model, optimization_log
+    
+    def _export_to_onnx(self, model, model_path):
+        """
+        Export model to ONNX format for optimized inference
+        """
+        try:
+            input_size = self.config['model_optimization']['cnn']['input_size']
+            dummy_input = torch.randn(1, 3, input_size, input_size)
+            
+            onnx_path = model_path.replace('.pth', '.onnx') if model_path else 'optimized_model.onnx'
+            
+            torch.onnx.export(
+                model,
+                dummy_input,
+                onnx_path,
+                export_params=True,
+                opset_version=11,
+                do_constant_folding=True,
+                input_names=['input'],
+                output_names=['output'],
+                dynamic_axes={
+                    'input': {0: 'batch_size'},
+                    'output': {0: 'batch_size'}
+                }
+            )
+            
+            print(f"✅ Model exported to ONNX: {onnx_path}")
+            
+        except Exception as e:
+            print(f"❌ ONNX export failed: {e}")
+
+
+class EnsemblePredictor:
+    """
+    Ensemble predictor for improved accuracy using multiple models
+    """
+    
+    def __init__(self, models, weights=None):
+        """
+        Initialize ensemble with multiple models
+        """
+        self.models = models
+        self.weights = weights or [1.0/len(models)] * len(models)
+        
+        # Ensure all models are in eval mode
+        for model in self.models:
+            model.eval()
+    
+    def predict(self, image):
+        """
+        Ensemble prediction with weighted voting
+        """
+        predictions = []
+        confidences = []
+        
+        for model in self.models:
+            with torch.no_grad():
+                if hasattr(model, 'predict_optimized'):
+                    result = model.predict_optimized(image)
+                    predictions.append(result['is_live'])
+                    confidences.append(result['confidence'])
+                else:
+                    # Direct model inference
+                    if isinstance(image, np.ndarray):
+                        tensor = torch.from_numpy(image).float().permute(2, 0, 1).unsqueeze(0) / 255.0
+                    else:
+                        tensor = image
+                    
+                    outputs = model(tensor)
+                    probs = F.softmax(outputs, dim=1)
+                    confidence = float(probs[0][1])
+                    
+                    predictions.append(confidence > 0.5)
+                    confidences.append(confidence)
+        
+        # Weighted voting
+        weighted_confidence = sum(w * c for w, c in zip(self.weights, confidences))
+        weighted_prediction = weighted_confidence > 0.5
+        
+        return {
+            'is_live': weighted_prediction,
+            'confidence': weighted_confidence,
+            'individual_predictions': predictions,
+            'individual_confidences': confidences
+        }
+
+
+class PerformanceProfiler:
+    """
+    Advanced performance profiler for optimization analysis
+    """
+    
+    def __init__(self):
+        self.metrics = {
+            'inference_times': [],
+            'memory_usage': [],
+            'cpu_usage': [],
+            'gpu_usage': [],
+            'accuracy_scores': []
+        }
+        
+    def start_profiling(self):
+        """Start performance profiling"""
+        import psutil
+        self.start_time = time.time()
+        self.start_memory = psutil.virtual_memory().used / 1024 / 1024  # MB
+        
+    def end_profiling(self, accuracy=None):
+        """End profiling and record metrics"""
+        import psutil
+        
+        inference_time = time.time() - self.start_time
+        current_memory = psutil.virtual_memory().used / 1024 / 1024  # MB
+        memory_delta = current_memory - self.start_memory
+        cpu_percent = psutil.cpu_percent()
+        
+        self.metrics['inference_times'].append(inference_time)
+        self.metrics['memory_usage'].append(memory_delta)
+        self.metrics['cpu_usage'].append(cpu_percent)
+        
+        if accuracy is not None:
+            self.metrics['accuracy_scores'].append(accuracy)
+        
+        # GPU usage (if available)
+        try:
+            import GPUtil
+            gpus = GPUtil.getGPUs()
+            if gpus:
+                self.metrics['gpu_usage'].append(gpus[0].load * 100)
+        except:
+            pass
+    
+    def get_report(self):
+        """Generate performance report"""
+        if not self.metrics['inference_times']:
+            return "No profiling data available"
+        
+        report = {
+            'average_inference_time': np.mean(self.metrics['inference_times']),
+            'estimated_fps': 1.0 / np.mean(self.metrics['inference_times']),
+            'average_memory_delta': np.mean(self.metrics['memory_usage']),
+            'average_cpu_usage': np.mean(self.metrics['cpu_usage']),
+            'total_samples': len(self.metrics['inference_times'])
+        }
+        
+        if self.metrics['accuracy_scores']:
+            report['average_accuracy'] = np.mean(self.metrics['accuracy_scores'])
+        
+        if self.metrics['gpu_usage']:
+            report['average_gpu_usage'] = np.mean(self.metrics['gpu_usage'])
+        
+        return report
+
+
 if __name__ == "__main__":
-    print("🚀 TESTING OPTIMIZED CNN MODEL")
-    print("=" * 50)
+    print("🚀 TESTING OPTIMIZED CNN MODEL WITH ADVANCED FEATURES")
+    print("=" * 60)
+    
+    # Initialize profiler
+    profiler = PerformanceProfiler()
     
     # Test different model configurations
     models_to_test = [
@@ -541,14 +795,20 @@ if __name__ == "__main__":
         print(f"Total parameters: {total_params:,}")
         print(f"Trainable parameters: {trainable_params:,}")
         
-        # Benchmark
+        # Model size estimation
+        param_size = sum(p.numel() * p.element_size() for p in model.parameters())
+        buffer_size = sum(b.numel() * b.element_size() for b in model.buffers())
+        model_size_mb = (param_size + buffer_size) / 1024 / 1024
+        print(f"Model size: {model_size_mb:.2f} MB")
+        
+        # Benchmark with profiling
         stats = benchmark_model(model, num_iterations=50)
         print(f"Avg inference time: {stats['avg_inference_time']*1000:.1f}ms")
         print(f"Estimated FPS: {stats['estimated_fps']:.1f}")
         print(f"Device: {stats['device']}")
     
-    # Test predictor
-    print(f"\n🎯 Testing OptimizedLivenessPredictor:")
+    # Test predictor with profiling
+    print(f"\n🎯 Testing OptimizedLivenessPredictor with Profiling:")
     predictor = OptimizedLivenessPredictor()
     
     # Test with dummy image
@@ -558,15 +818,45 @@ if __name__ == "__main__":
     for _ in range(5):
         predictor.predict_optimized(dummy_image)
     
-    # Performance test
+    # Performance test with profiling
     times = []
-    for _ in range(20):
-        start = time.time()
+    for i in range(20):
+        profiler.start_profiling()
         result = predictor.predict_optimized(dummy_image)
-        times.append(time.time() - start)
+        profiler.end_profiling(accuracy=result.get('confidence', 0))
+        times.append(profiler.metrics['inference_times'][-1])
+        
+        if i % 5 == 0:
+            print(f"Iteration {i+1}: {times[-1]*1000:.1f}ms")
     
-    print(f"Predictor avg time: {np.mean(times)*1000:.1f}ms")
+    print(f"\nPredictor avg time: {np.mean(times)*1000:.1f}ms")
     print(f"Predictor estimated FPS: {1.0/np.mean(times):.1f}")
     
+    # Performance stats
     stats = predictor.get_performance_stats()
     print(f"Predictor stats: {stats}")
+    
+    # Profiler report
+    profile_report = profiler.get_report()
+    print(f"\n📈 Performance Profile Report:")
+    for key, value in profile_report.items():
+        if isinstance(value, float):
+            print(f"{key}: {value:.3f}")
+        else:
+            print(f"{key}: {value}")
+    
+    # Test model optimization
+    print(f"\n⚡ Testing Model Optimization:")
+    optimizer = ModelOptimizer()
+    base_model = OptimizedLivenessCNN()
+    
+    try:
+        optimized_model, optimization_log = optimizer.optimize_model(base_model)
+        print("Optimization applied:")
+        for log_entry in optimization_log:
+            print(f"  ✅ {log_entry}")
+    except Exception as e:
+        print(f"  ❌ Optimization failed: {e}")
+    
+    print("\n🎉 Testing completed!")
+    print("=" * 60)

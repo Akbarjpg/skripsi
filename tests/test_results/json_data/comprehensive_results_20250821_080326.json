@@ -1,0 +1,46 @@
+{
+  "timestamp": "2025-08-21T08:03:26.177365",
+  "antispoofing": [
+    {
+      "scenario": "printed_photos",
+      "tp": 80,
+      "tn": 85,
+      "fp": 7,
+      "fn": 4,
+      "accuracy": 0.9375
+    },
+    {
+      "scenario": "digital_displays",
+      "tp": 87,
+      "tn": 89,
+      "fp": 5,
+      "fn": 7,
+      "accuracy": 0.9361702127659575
+    },
+    {
+      "scenario": "video_replays",
+      "tp": 80,
+      "tn": 93,
+      "fp": 3,
+      "fn": 8,
+      "accuracy": 0.9402173913043478
+    },
+    {
+      "scenario": "masks_3d",
+      "tp": 84,
+      "tn": 91,
+      "fp": 5,
+      "fn": 3,
+      "accuracy": 0.9562841530054644
+    }
+  ],
+  "face_recognition": {
+    "auc": 0.8010427729849343,
+    "data_points": 100
+  },
+  "performance": {
+    "avg_cpu": 53.54851734798213,
+    "avg_memory": 61.269884224792484,
+    "avg_fps": 30.88792384833139
+  }
+}

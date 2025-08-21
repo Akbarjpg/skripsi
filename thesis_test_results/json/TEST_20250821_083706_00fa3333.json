@@ -1,0 +1,42 @@
+{
+  "test_info": {
+    "test_id": "TEST_20250821_083706_00fa3333",
+    "test_date": "2025-08-21 08:37:06",
+    "test_type": "antispoofing",
+    "dataset_info": {
+      "total_samples": 1000,
+      "real_samples": 500,
+      "fake_samples": 500,
+      "unique_individuals": 100
+    }
+  },
+  "results": {
+    "antispoofing": {
+      "accuracy": 0.96,
+      "precision": 0.96,
+      "recall": 0.96,
+      "f1_score": 0.96,
+      "far": 0.04,
+      "frr": 0.04,
+      "average_detection_time": 0.15,
+      "confusion_matrix": [
+        [
+          480,
+          20
+        ],
+        [
+          20,
+          480
+        ]
+      ]
+    },
+    "face_recognition": null,
+    "performance": {
+      "cpu_usage_avg": 27.48,
+      "memory_usage_avg": 11869.84,
+      "fps_avg": 25.0,
+      "total_processing_time": 0.75
+    }
+  },
+  "detailed_logs": "logs/Video_Replay_Attack_Test_detailed.log"
+}

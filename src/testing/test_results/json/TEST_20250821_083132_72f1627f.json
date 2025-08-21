@@ -1,0 +1,31 @@
+{
+  "test_info": {
+    "test_id": "TEST_20250821_083132_72f1627f",
+    "test_date": "2025-08-21 08:31:32",
+    "test_type": "face_recognition",
+    "dataset_info": {
+      "total_samples": 1000,
+      "real_samples": 500,
+      "fake_samples": 500,
+      "unique_individuals": 100
+    }
+  },
+  "results": {
+    "antispoofing": null,
+    "face_recognition": {
+      "rank1_accuracy": 0.92,
+      "rank5_accuracy": 0.98,
+      "verification_accuracy": 0.95,
+      "average_recognition_time": 0.085,
+      "false_match_rate": 0.02,
+      "false_non_match_rate": 0.03
+    },
+    "performance": {
+      "cpu_usage_avg": 27.45,
+      "memory_usage_avg": 11818.05,
+      "fps_avg": 30.0,
+      "total_processing_time": 0.51
+    }
+  },
+  "detailed_logs": "test_results/logs/face_recognition_detailed.log"
+}

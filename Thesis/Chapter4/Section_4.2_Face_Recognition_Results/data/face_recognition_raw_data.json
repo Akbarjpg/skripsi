@@ -1,0 +1,113 @@
+[
+  {
+    "test_info": {
+      "test_id": "TEST_20250821_083708_1bfe19ca",
+      "test_date": "2025-08-21 08:37:08",
+      "test_type": "face_recognition",
+      "dataset_info": {
+        "total_samples": 1000,
+        "real_samples": 500,
+        "fake_samples": 500,
+        "unique_individuals": 100
+      }
+    },
+    "results": {
+      "antispoofing": null,
+      "face_recognition": {
+        "rank1_accuracy": 0.92,
+        "rank5_accuracy": 0.98,
+        "verification_accuracy": 0.95,
+        "average_recognition_time": 0.084,
+        "false_match_rate": 0.02,
+        "false_non_match_rate": 0.03
+      },
+      "performance": {
+        "cpu_usage_avg": 37.53,
+        "memory_usage_avg": 11876.55,
+        "fps_avg": 30.0,
+        "total_processing_time": 0.42
+      }
+    },
+    "detailed_logs": "logs/Frontal_Face_Recognition_Test_detailed.log"
+  },
+  {
+    "test_info": {
+      "test_id": "TEST_20250821_083710_503260fe",
+      "test_date": "2025-08-21 08:37:10",
+      "test_type": "face_recognition",
+      "dataset_info": {
+        "total_samples": 1000,
+        "real_samples": 500,
+        "fake_samples": 500,
+        "unique_individuals": 100
+      }
+    },
+    "results": {
+      "antispoofing": null,
+      "face_recognition": {
+        "rank1_accuracy": 0.88,
+        "rank5_accuracy": 0.95,
+        "verification_accuracy": 0.9,
+        "average_recognition_time": 0.1,
+        "false_match_rate": 0.03,
+        "false_non_match_rate": 0.07
+      },
+      "performance": {
+        "cpu_usage_avg": 33.48,
+        "memory_usage_avg": 11835.01,
+        "fps_avg": 30.0,
+        "total_processing_time": 0.5
+      }
+    },
+    "detailed_logs": "logs/Multi_Angle_Recognition_Test_detailed.log"
+  },
+  {
+    "test_info": {
+      "test_id": "TEST_20250821_083713_ab53d096",
+      "test_date": "2025-08-21 08:37:13",
+      "test_type": "integration",
+      "dataset_info": {
+        "total_samples": 1000,
+        "real_samples": 500,
+        "fake_samples": 500,
+        "unique_individuals": 100
+      }
+    },
+    "results": {
+      "antispoofing": {
+        "accuracy": 0.94,
+        "precision": 0.9314,
+        "recall": 0.95,
+        "f1_score": 0.9406,
+        "far": 0.07,
+        "frr": 0.05,
+        "average_detection_time": 0.154,
+        "confusion_matrix": [
+          [
+            475,
+            35
+          ],
+          [
+            25,
+            465
+          ]
+        ]
+      },
+      "face_recognition": {
+        "rank1_accuracy": 0.85,
+        "rank5_accuracy": 0.92,
+        "verification_accuracy": 0.87,
+        "average_recognition_time": 0.104,
+        "false_match_rate": 0.04,
+        "false_non_match_rate": 0.09
+      },
+      "performance": {
+        "cpu_usage_avg": 37.84,
+        "memory_usage_avg": 11838.31,
+        "fps_avg": 20.0,
+        "total_processing_time": 15.3
+      }
+    },
+    "detailed_logs": "logs/integration_test_detailed.log"
+  }
+]

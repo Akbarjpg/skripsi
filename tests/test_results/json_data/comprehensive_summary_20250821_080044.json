@@ -1,0 +1,610 @@
+{
+  "export_info": {
+    "timestamp": "2025-08-21T08:00:44.989802",
+    "framework_version": "1.0-simplified",
+    "data_format": "comprehensive_test_results"
+  },
+  "test_metadata": {
+    "test_id": "test_1755734443",
+    "start_time": "2025-08-21 08:00:43.533561",
+    "test_version": "1.0",
+    "system_info": {
+      "os": "Windows-11-10.0.26100-SP0",
+      "cpu_count": 8,
+      "memory_total": 25546969088,
+      "python_version": "3.12.3 (tags/v3.12.3:f6650f9, Apr  9 2024, 14:05:25) [MSC v.1938 64 bit (AMD64)]",
+      "timestamp": "2025-08-21T08:00:43.845279"
+    }
+  },
+  "test_results": {
+    "antispoofing": {
+      "test_type": "antispoofing",
+      "total_scenarios": 4,
+      "results": [
+        {
+          "scenario": "printed_photos",
+          "tp": 85,
+          "tn": 89,
+          "fp": 2,
+          "fn": 3,
+          "total_samples": 179,
+          "accuracy": 0.9720670391061452,
+          "precision": 0.9770114942528736,
+          "recall": 0.9659090909090909,
+          "f1_score": 0.9714285714285714,
+          "avg_detection_time": 0.6333393182519986
+        },
+        {
+          "scenario": "digital_displays",
+          "tp": 84,
+          "tn": 93,
+          "fp": 7,
+          "fn": 7,
+          "total_samples": 191,
+          "accuracy": 0.9267015706806283,
+          "precision": 0.9230769230769231,
+          "recall": 0.9230769230769231,
+          "f1_score": 0.9230769230769231,
+          "avg_detection_time": 1.9457924319793736
+        },
+        {
+          "scenario": "video_replays",
+          "tp": 86,
+          "tn": 89,
+          "fp": 2,
+          "fn": 6,
+          "total_samples": 183,
+          "accuracy": 0.9562841530054644,
+          "precision": 0.9772727272727273,
+          "recall": 0.9347826086956522,
+          "f1_score": 0.9555555555555557,
+          "avg_detection_time": 1.2236343849976095
+        },
+        {
+          "scenario": "masks_3d",
+          "tp": 89,
+          "tn": 86,
+          "fp": 7,
+          "fn": 8,
+          "total_samples": 190,
+          "accuracy": 0.9210526315789473,
+          "precision": 0.9270833333333334,
+          "recall": 0.9175257731958762,
+          "f1_score": 0.9222797927461139,
+          "avg_detection_time": 1.867592945149633
+        }
+      ],
+      "timestamp": "2025-08-21T08:00:43.952716"
+    },
+    "face_recognition": {
+      "test_type": "face_recognition",
+      "total_scenarios": 48,
+      "results": [
+        {
+          "test_scenario": "bright_0deg_neutral",
+          "lighting": "bright",
+          "angle": 0,
+          "expression": "neutral",
+          "recognition_rate": 0.9492318744964685,
+          "false_match_rate": 0.014003504252742056,
+          "avg_processing_time": 0.09331084448849854,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "bright_0deg_smiling",
+          "lighting": "bright",
+          "angle": 0,
+          "expression": "smiling",
+          "recognition_rate": 0.9103100102446209,
+          "false_match_rate": 0.05145297417493981,
+          "avg_processing_time": 0.18312323262576047,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "bright_0deg_talking",
+          "lighting": "bright",
+          "angle": 0,
+          "expression": "talking",
+          "recognition_rate": 0.9565486082244039,
+          "false_match_rate": 0.037640353539116926,
+          "avg_processing_time": 0.08682536289324147,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "bright_15deg_neutral",
+          "lighting": "bright",
+          "angle": 15,
+          "expression": "neutral",
+          "recognition_rate": 0.8984687243445169,
+          "false_match_rate": 0.06234574977261001,
+          "avg_processing_time": 0.14544657681015322,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "bright_15deg_smiling",
+          "lighting": "bright",
+          "angle": 15,
+          "expression": "smiling",
+          "recognition_rate": 0.8811405039502069,
+          "false_match_rate": 0.020502535310751482,
+          "avg_processing_time": 0.08349515865036158,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "bright_15deg_talking",
+          "lighting": "bright",
+          "angle": 15,
+          "expression": "talking",
+          "recognition_rate": 0.9226190139527461,
+          "false_match_rate": 0.010291727249426001,
+          "avg_processing_time": 0.17207738970953929,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "bright_30deg_neutral",
+          "lighting": "bright",
+          "angle": 30,
+          "expression": "neutral",
+          "recognition_rate": 0.9606300215095449,
+          "false_match_rate": 0.022666104505158442,
+          "avg_processing_time": 0.10739793327300332,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "bright_30deg_smiling",
+          "lighting": "bright",
+          "angle": 30,
+          "expression": "smiling",
+          "recognition_rate": 0.8854943765454388,
+          "false_match_rate": 0.03336091830643058,
+          "avg_processing_time": 0.18993266836434852,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "bright_30deg_talking",
+          "lighting": "bright",
+          "angle": 30,
+          "expression": "talking",
+          "recognition_rate": 0.9115059989547638,
+          "false_match_rate": 0.04416244971973738,
+          "avg_processing_time": 0.20545267194643474,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "bright_45deg_neutral",
+          "lighting": "bright",
+          "angle": 45,
+          "expression": "neutral",
+          "recognition_rate": 0.9015863935088808,
+          "false_match_rate": 0.06059121589272671,
+          "avg_processing_time": 0.08635838930522254,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "bright_45deg_smiling",
+          "lighting": "bright",
+          "angle": 45,
+          "expression": "smiling",
+          "recognition_rate": 0.9465216828807296,
+          "false_match_rate": 0.03945051814986196,
+          "avg_processing_time": 0.17308686134174853,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "bright_45deg_talking",
+          "lighting": "bright",
+          "angle": 45,
+          "expression": "talking",
+          "recognition_rate": 0.9704650317020985,
+          "false_match_rate": 0.026282833145663632,
+          "avg_processing_time": 0.21460179004490337,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "dim_0deg_neutral",
+          "lighting": "dim",
+          "angle": 0,
+          "expression": "neutral",
+          "recognition_rate": 0.9745986264074331,
+          "false_match_rate": 0.010128556275010558,
+          "avg_processing_time": 0.1875039169023447,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "dim_0deg_smiling",
+          "lighting": "dim",
+          "angle": 0,
+          "expression": "smiling",
+          "recognition_rate": 0.9035390799685291,
+          "false_match_rate": 0.03214289661454542,
+          "avg_processing_time": 0.16271264584141348,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "dim_0deg_talking",
+          "lighting": "dim",
+          "angle": 0,
+          "expression": "talking",
+          "recognition_rate": 0.9399122209201721,
+          "false_match_rate": 0.055426705824688303,
+          "avg_processing_time": 0.08217406593935117,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "dim_15deg_neutral",
+          "lighting": "dim",
+          "angle": 15,
+          "expression": "neutral",
+          "recognition_rate": 0.9025664100417653,
+          "false_match_rate": 0.0510623828138914,
+          "avg_processing_time": 0.1311783026020352,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "dim_15deg_smiling",
+          "lighting": "dim",
+          "angle": 15,
+          "expression": "smiling",
+          "recognition_rate": 0.8800005562891705,
+          "false_match_rate": 0.06090716953398262,
+          "avg_processing_time": 0.21863637128855024,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "dim_15deg_talking",
+          "lighting": "dim",
+          "angle": 15,
+          "expression": "talking",
+          "recognition_rate": 0.9186935452249011,
+          "false_match_rate": 0.03303913815186234,
+          "avg_processing_time": 0.2214045611015788,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "dim_30deg_neutral",
+          "lighting": "dim",
+          "angle": 30,
+          "expression": "neutral",
+          "recognition_rate": 0.9342373603632301,
+          "false_match_rate": 0.04572339295997563,
+          "avg_processing_time": 0.19663879443298424,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "dim_30deg_smiling",
+          "lighting": "dim",
+          "angle": 30,
+          "expression": "smiling",
+          "recognition_rate": 0.9771510721166545,
+          "false_match_rate": 0.0468652258733939,
+          "avg_processing_time": 0.0812931119733454,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "dim_30deg_talking",
+          "lighting": "dim",
+          "angle": 30,
+          "expression": "talking",
+          "recognition_rate": 0.9205276118158504,
+          "false_match_rate": 0.016865926964024367,
+          "avg_processing_time": 0.24266747019477225,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "dim_45deg_neutral",
+          "lighting": "dim",
+          "angle": 45,
+          "expression": "neutral",
+          "recognition_rate": 0.9597260633647857,
+          "false_match_rate": 0.026534496292182595,
+          "avg_processing_time": 0.13243397981925725,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "dim_45deg_smiling",
+          "lighting": "dim",
+          "angle": 45,
+          "expression": "smiling",
+          "recognition_rate": 0.8928080282993491,
+          "false_match_rate": 0.03256605334978536,
+          "avg_processing_time": 0.20348540644564678,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "dim_45deg_talking",
+          "lighting": "dim",
+          "angle": 45,
+          "expression": "talking",
+          "recognition_rate": 0.9350081713358959,
+          "false_match_rate": 0.06772475471560616,
+          "avg_processing_time": 0.08691874284095925,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "normal_0deg_neutral",
+          "lighting": "normal",
+          "angle": 0,
+          "expression": "neutral",
+          "recognition_rate": 0.9705771110257814,
+          "false_match_rate": 0.011652110352769699,
+          "avg_processing_time": 0.08533737765722586,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "normal_0deg_smiling",
+          "lighting": "normal",
+          "angle": 0,
+          "expression": "smiling",
+          "recognition_rate": 0.8944460472448247,
+          "false_match_rate": 0.019502084301737832,
+          "avg_processing_time": 0.08073093197556512,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "normal_0deg_talking",
+          "lighting": "normal",
+          "angle": 0,
+          "expression": "talking",
+          "recognition_rate": 0.8986987217509858,
+          "false_match_rate": 0.05391138189125527,
+          "avg_processing_time": 0.22241226958701354,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "normal_15deg_neutral",
+          "lighting": "normal",
+          "angle": 15,
+          "expression": "neutral",
+          "recognition_rate": 0.9145404970799877,
+          "false_match_rate": 0.06572324443339934,
+          "avg_processing_time": 0.160124826784121,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "normal_15deg_smiling",
+          "lighting": "normal",
+          "angle": 15,
+          "expression": "smiling",
+          "recognition_rate": 0.9036489943939696,
+          "false_match_rate": 0.07893790785748107,
+          "avg_processing_time": 0.22428784777091482,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "normal_15deg_talking",
+          "lighting": "normal",
+          "angle": 15,
+          "expression": "talking",
+          "recognition_rate": 0.9095885290013485,
+          "false_match_rate": 0.040918216280370394,
+          "avg_processing_time": 0.22648946232140715,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "normal_30deg_neutral",
+          "lighting": "normal",
+          "angle": 30,
+          "expression": "neutral",
+          "recognition_rate": 0.9184772418948823,
+          "false_match_rate": 0.04478331881788518,
+          "avg_processing_time": 0.13153174450718857,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "normal_30deg_smiling",
+          "lighting": "normal",
+          "angle": 30,
+          "expression": "smiling",
+          "recognition_rate": 0.9077715582504366,
+          "false_match_rate": 0.018441569984706654,
+          "avg_processing_time": 0.11054835380634852,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "normal_30deg_talking",
+          "lighting": "normal",
+          "angle": 30,
+          "expression": "talking",
+          "recognition_rate": 0.9731727542735223,
+          "false_match_rate": 0.0408695908124687,
+          "avg_processing_time": 0.12149069698795331,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "normal_45deg_neutral",
+          "lighting": "normal",
+          "angle": 45,
+          "expression": "neutral",
+          "recognition_rate": 0.910898550028735,
+          "false_match_rate": 0.03850303439612616,
+          "avg_processing_time": 0.24161259846370736,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "normal_45deg_smiling",
+          "lighting": "normal",
+          "angle": 45,
+          "expression": "smiling",
+          "recognition_rate": 0.9199005216913543,
+          "false_match_rate": 0.039009153756893004,
+          "avg_processing_time": 0.17737556566728296,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "normal_45deg_talking",
+          "lighting": "normal",
+          "angle": 45,
+          "expression": "talking",
+          "recognition_rate": 0.8847997833750982,
+          "false_match_rate": 0.06816622332004162,
+          "avg_processing_time": 0.13038237458951496,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "backlit_0deg_neutral",
+          "lighting": "backlit",
+          "angle": 0,
+          "expression": "neutral",
+          "recognition_rate": 0.9503775165377681,
+          "false_match_rate": 0.03721217968715474,
+          "avg_processing_time": 0.23305867759490784,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "backlit_0deg_smiling",
+          "lighting": "backlit",
+          "angle": 0,
+          "expression": "smiling",
+          "recognition_rate": 0.9474697145375847,
+          "false_match_rate": 0.0679907649720321,
+          "avg_processing_time": 0.10660181395654543,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "backlit_0deg_talking",
+          "lighting": "backlit",
+          "angle": 0,
+          "expression": "talking",
+          "recognition_rate": 0.977858453833836,
+          "false_match_rate": 0.06863758104271801,
+          "avg_processing_time": 0.234970645128405,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "backlit_15deg_neutral",
+          "lighting": "backlit",
+          "angle": 15,
+          "expression": "neutral",
+          "recognition_rate": 0.8920732333841908,
+          "false_match_rate": 0.02832446956310116,
+          "avg_processing_time": 0.17209492726210696,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "backlit_15deg_smiling",
+          "lighting": "backlit",
+          "angle": 15,
+          "expression": "smiling",
+          "recognition_rate": 0.8874562243225212,
+          "false_match_rate": 0.02663775710563744,
+          "avg_processing_time": 0.09501135412787752,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "backlit_15deg_talking",
+          "lighting": "backlit",
+          "angle": 15,
+          "expression": "talking",
+          "recognition_rate": 0.9200402577807991,
+          "false_match_rate": 0.0707814603379372,
+          "avg_processing_time": 0.18437172128645715,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "backlit_30deg_neutral",
+          "lighting": "backlit",
+          "angle": 30,
+          "expression": "neutral",
+          "recognition_rate": 0.8991648508810829,
+          "false_match_rate": 0.07478244455774563,
+          "avg_processing_time": 0.0926228371033446,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "backlit_30deg_smiling",
+          "lighting": "backlit",
+          "angle": 30,
+          "expression": "smiling",
+          "recognition_rate": 0.8945926652151527,
+          "false_match_rate": 0.04110482848659943,
+          "avg_processing_time": 0.1614892366472413,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "backlit_30deg_talking",
+          "lighting": "backlit",
+          "angle": 30,
+          "expression": "talking",
+          "recognition_rate": 0.9335389783030245,
+          "false_match_rate": 0.02258248447817292,
+          "avg_processing_time": 0.18099352756375708,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "backlit_45deg_neutral",
+          "lighting": "backlit",
+          "angle": 45,
+          "expression": "neutral",
+          "recognition_rate": 0.9559111189537498,
+          "false_match_rate": 0.032692416840555044,
+          "avg_processing_time": 0.17658578444731748,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "backlit_45deg_smiling",
+          "lighting": "backlit",
+          "angle": 45,
+          "expression": "smiling",
+          "recognition_rate": 0.9691397993500208,
+          "false_match_rate": 0.05170407211989955,
+          "avg_processing_time": 0.17940131174835577,
+          "total_tests": 50
+        },
+        {
+          "test_scenario": "backlit_45deg_talking",
+          "lighting": "backlit",
+          "angle": 45,
+          "expression": "talking",
+          "recognition_rate": 0.9147131580495393,
+          "false_match_rate": 0.03682773111494072,
+          "avg_processing_time": 0.23306741277847748,
+          "total_tests": 50
+        }
+      ],
+      "timestamp": "2025-08-21T08:00:43.952716"
+    },
+    "performance": {
+      "test_type": "performance",
+      "cpu_usage": {
+        "samples": [
+          22.8,
+          32.0,
+          21.8,
+          10.9,
+          24.5,
+          9.3,
+          55.6,
+          11.1,
+          17.0,
+          22.0
+        ],
+        "avg": 22.7,
+        "max": 55.6,
+        "min": 9.3
+      },
+      "memory_usage": {
+        "samples": [
+          48.7,
+          48.7,
+          48.7,
+          48.7,
+          48.6,
+          48.6,
+          48.6,
+          48.6,
+          48.6,
+          48.6
+        ],
+        "avg": 48.64000000000001,
+        "max": 48.7,
+        "min": 48.6
+      },
+      "system_info": {
+        "total_memory": 25546969088,
+        "available_memory": 13120630784,
+        "cpu_count": 8
+      },
+      "timestamp": "2025-08-21T08:00:44.975029"
+    }
+  }
+}

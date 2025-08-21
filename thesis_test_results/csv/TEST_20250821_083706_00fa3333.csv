@@ -1,0 +1,19 @@
+Metric,Value,Category
+Test ID,TEST_20250821_083706_00fa3333,Test Info
+Test Date,2025-08-21 08:37:06,Test Info
+Test Type,antispoofing,Test Info
+Total Samples,1000,Dataset
+Real Samples,500,Dataset
+Fake Samples,500,Dataset
+Unique Individuals,100,Dataset
+Accuracy,0.96,Anti-Spoofing
+Precision,0.96,Anti-Spoofing
+Recall,0.96,Anti-Spoofing
+F1 Score,0.96,Anti-Spoofing
+FAR,0.04,Anti-Spoofing
+FRR,0.04,Anti-Spoofing
+Avg Detection Time,0.15,Anti-Spoofing
+CPU Usage Avg,27.48,Performance
+Memory Usage Avg,11869.84,Performance
+FPS Avg,25.0,Performance
+Total Processing Time,0.75,Performance

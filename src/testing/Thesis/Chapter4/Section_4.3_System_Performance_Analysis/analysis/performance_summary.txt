@@ -1,0 +1,21 @@
+SYSTEM PERFORMANCE ANALYSIS
+===================================
+
+CPU UTILIZATION:
+  Mean: 37.22%
+  Peak: 48.65%
+  Efficiency: High
+
+MEMORY UTILIZATION:
+  Mean: 11820.04 MB
+  Peak: 11861.74 MB
+  Stability: Stable
+
+FRAME PROCESSING RATE:
+  Mean FPS: 25.00
+  Real-time Capability: Yes
+  Consistency: Medium
+
+PROCESSING TIME:
+  Mean: 5.580s
+  User Experience: Needs Improvement

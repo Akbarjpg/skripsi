@@ -1,0 +1,26 @@
+SYSTEM COMPARISON ANALYSIS
+===================================
+
+PERFORMANCE COMPARISON BY TEST TYPE:
+
+ANTISPOOFING:
+  CPU Usage: 48.65%
+  Memory Usage: 11780.33 MB
+  Processing Speed: 25.00 FPS
+  Total Time: 0.930s
+  Efficiency Score: 4.49/10
+
+FACE_RECOGNITION:
+  CPU Usage: 27.45%
+  Memory Usage: 11818.05 MB
+  Processing Speed: 30.00 FPS
+  Total Time: 0.510s
+  Efficiency Score: 5.75/10
+
+INTEGRATION:
+  CPU Usage: 35.56%
+  Memory Usage: 11861.74 MB
+  Processing Speed: 20.00 FPS
+  Total Time: 15.300s
+  Efficiency Score: 4.37/10
+

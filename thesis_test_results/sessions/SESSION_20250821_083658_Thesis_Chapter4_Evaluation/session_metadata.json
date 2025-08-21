@@ -1,0 +1,12 @@
+{
+  "session_name": "Thesis_Chapter4_Evaluation",
+  "start_timestamp": "2025-08-21T08:36:58.728017",
+  "total_tests": 6,
+  "test_types": [
+    "antispoofing",
+    "face_recognition",
+    "integration"
+  ],
+  "end_timestamp": "2025-08-21T08:37:13.904064",
+  "duration_minutes": 0.25293411666666665
+}

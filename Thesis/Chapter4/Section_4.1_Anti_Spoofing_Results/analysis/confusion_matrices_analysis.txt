@@ -1,0 +1,42 @@
+CONFUSION MATRIX ANALYSIS
+==============================
+
+Test 1 (TEST_20250821_083701_3a9c7262):
+  True Positives (Real correctly identified): 485
+  True Negatives (Fake correctly rejected): 475
+  False Positives (Fake wrongly accepted): 25
+  False Negatives (Real wrongly rejected): 15
+  Security Risk Score (FP rate): 0.0500
+  User Experience Score (1-FN rate): 0.9700
+
+Test 2 (TEST_20250821_083703_0fe13595):
+  True Positives (Real correctly identified): 490
+  True Negatives (Fake correctly rejected): 470
+  False Positives (Fake wrongly accepted): 30
+  False Negatives (Real wrongly rejected): 10
+  Security Risk Score (FP rate): 0.0600
+  User Experience Score (1-FN rate): 0.9800
+
+Test 3 (TEST_20250821_083706_00fa3333):
+  True Positives (Real correctly identified): 480
+  True Negatives (Fake correctly rejected): 480
+  False Positives (Fake wrongly accepted): 20
+  False Negatives (Real wrongly rejected): 20
+  Security Risk Score (FP rate): 0.0400
+  User Experience Score (1-FN rate): 0.9600
+
+Test 4 (TEST_20250821_083713_ab53d096):
+  True Positives (Real correctly identified): 475
+  True Negatives (Fake correctly rejected): 465
+  False Positives (Fake wrongly accepted): 35
+  False Negatives (Real wrongly rejected): 25
+  Security Risk Score (FP rate): 0.0700
+  User Experience Score (1-FN rate): 0.9500
+
+OVERALL ANALYSIS:
+Total True Positives: 1930
+Total True Negatives: 1890
+Total False Positives: 110
+Total False Negatives: 70
+Overall Accuracy: 0.9550
+Overall Security Risk: 0.0550

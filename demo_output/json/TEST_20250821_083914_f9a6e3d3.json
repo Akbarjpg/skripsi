@@ -1,0 +1,26 @@
+{
+  "test_info": {
+    "test_id": "TEST_20250821_083914_f9a6e3d3",
+    "test_date": "2025-08-21 08:39:14",
+    "test_type": "face_recognition",
+    "dataset_info": {
+      "total_samples": 1000,
+      "real_samples": 500,
+      "fake_samples": 500,
+      "unique_individuals": 100
+    }
+  },
+  "results": {
+    "antispoofing": null,
+    "face_recognition": {
+      "rank1_accuracy": 0.92,
+      "rank5_accuracy": 0.98,
+      "verification_accuracy": 0.95,
+      "average_recognition_time": 0.084,
+      "false_match_rate": 0.02,
+      "false_non_match_rate": 0.03
+    },
+    "performance": null
+  },
+  "detailed_logs": "logs/face_recognition_test.log"
+}

@@ -553,21 +553,436 @@ class ThreadedLivenessProcessor:
         self.executor.shutdown(wait=False)
 
 
-if __name__ == "__main__":
-    # Performance test
-    print("🚀 TESTING OPTIMIZED LANDMARK DETECTION")
-    print("=" * 50)
+# Advanced optimization features
+class FaceTracker:
+    """
+    Optimized face tracker to avoid re-detection in consecutive frames
+    """
     
+    def __init__(self, tracking_quality_threshold=0.7, max_tracking_frames=30):
+        """
+        Initialize face tracker
+        """
+        self.tracking_quality_threshold = tracking_quality_threshold
+        self.max_tracking_frames = max_tracking_frames
+        self.tracker = None
+        self.tracking_frame_count = 0
+        self.last_bbox = None
+        self.is_tracking = False
+        
+    def start_tracking(self, image, bbox):
+        """
+        Start tracking a face in the given bounding box
+        """
+        try:
+            # Use CSRT tracker for balance of speed and accuracy
+            self.tracker = cv2.TrackerCSRT_create()
+            
+            # Convert bbox format if needed
+            x, y, w, h = bbox
+            if w < 0:
+                x += w
+                w = -w
+            if h < 0:
+                y += h
+                h = -h
+            
+            # Initialize tracker
+            success = self.tracker.init(image, (x, y, w, h))
+            if success:
+                self.is_tracking = True
+                self.tracking_frame_count = 0
+                self.last_bbox = bbox
+                return True
+            
+        except Exception as e:
+            print(f"Tracking initialization error: {e}")
+            
+        return False
+    
+    def update_tracking(self, image):
+        """
+        Update tracker with new frame
+        """
+        if not self.is_tracking or self.tracker is None:
+            return None, 0.0
+        
+        try:
+            success, bbox = self.tracker.update(image)
+            self.tracking_frame_count += 1
+            
+            if success and self.tracking_frame_count < self.max_tracking_frames:
+                # Calculate tracking quality (simplified)
+                quality = max(0.0, 1.0 - (self.tracking_frame_count / self.max_tracking_frames))
+                
+                if quality >= self.tracking_quality_threshold:
+                    self.last_bbox = bbox
+                    return bbox, quality
+            
+            # Stop tracking if quality is too low or max frames reached
+            self.stop_tracking()
+            return None, 0.0
+            
+        except Exception as e:
+            print(f"Tracking update error: {e}")
+            self.stop_tracking()
+            return None, 0.0
+    
+    def stop_tracking(self):
+        """
+        Stop tracking
+        """
+        self.is_tracking = False
+        self.tracker = None
+        self.tracking_frame_count = 0
+
+
+class ROIProcessor:
+    """
+    Region of Interest processor for focused processing
+    """
+    
+    def __init__(self, expansion_factor=1.2, update_frequency=5):
+        """
+        Initialize ROI processor
+        """
+        self.expansion_factor = expansion_factor
+        self.update_frequency = update_frequency
+        self.current_roi = None
+        self.frame_count = 0
+        
+    def calculate_roi(self, image, face_bbox):
+        """
+        Calculate ROI based on face bounding box
+        """
+        if face_bbox is None:
+            return None
+        
+        h, w = image.shape[:2]
+        x, y, bbox_w, bbox_h = face_bbox
+        
+        # Expand bounding box
+        center_x, center_y = x + bbox_w // 2, y + bbox_h // 2
+        expanded_w = int(bbox_w * self.expansion_factor)
+        expanded_h = int(bbox_h * self.expansion_factor)
+        
+        # Calculate ROI coordinates
+        roi_x1 = max(0, center_x - expanded_w // 2)
+        roi_y1 = max(0, center_y - expanded_h // 2)
+        roi_x2 = min(w, center_x + expanded_w // 2)
+        roi_y2 = min(h, center_y + expanded_h // 2)
+        
+        return (roi_x1, roi_y1, roi_x2, roi_y2)
+    
+    def extract_roi(self, image, roi_coords=None):
+        """
+        Extract ROI from image
+        """
+        if roi_coords is None:
+            roi_coords = self.current_roi
+        
+        if roi_coords is None:
+            return image
+        
+        x1, y1, x2, y2 = roi_coords
+        return image[y1:y2, x1:x2]
+    
+    def update_roi(self, image, face_bbox):
+        """
+        Update ROI if needed
+        """
+        self.frame_count += 1
+        
+        if (self.frame_count % self.update_frequency == 0 or 
+            self.current_roi is None):
+            self.current_roi = self.calculate_roi(image, face_bbox)
+        
+        return self.current_roi
+
+
+class AdaptiveThresholdManager:
+    """
+    Adaptive threshold manager for environment-specific optimizations
+    """
+    
+    def __init__(self, learning_rate=0.05):
+        """
+        Initialize adaptive threshold manager
+        """
+        self.learning_rate = learning_rate
+        self.environment_stats = {
+            'brightness': deque(maxlen=50),
+            'contrast': deque(maxlen=50),
+            'face_size': deque(maxlen=50)
+        }
+        
+        # Base thresholds
+        self.base_thresholds = {
+            'blink_threshold': 0.22,
+            'mouth_threshold': 0.5,
+            'movement_threshold': 0.01
+        }
+        
+        # Current adaptive thresholds
+        self.current_thresholds = self.base_thresholds.copy()
+        
+    def analyze_environment(self, image, face_landmarks=None):
+        """
+        Analyze current environment conditions
+        """
+        # Brightness analysis
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        brightness = np.mean(gray)
+        self.environment_stats['brightness'].append(brightness)
+        
+        # Contrast analysis
+        contrast = np.std(gray)
+        self.environment_stats['contrast'].append(contrast)
+        
+        # Face size analysis (if landmarks available)
+        if face_landmarks:
+            face_area = self._calculate_face_area(face_landmarks)
+            self.environment_stats['face_size'].append(face_area)
+    
+    def _calculate_face_area(self, landmarks):
+        """
+        Calculate approximate face area from landmarks
+        """
+        if not landmarks or len(landmarks) < 4:
+            return 0
+        
+        landmarks_array = np.array(landmarks)
+        x_min, x_max = np.min(landmarks_array[:, 0]), np.max(landmarks_array[:, 0])
+        y_min, y_max = np.min(landmarks_array[:, 1]), np.max(landmarks_array[:, 1])
+        
+        return (x_max - x_min) * (y_max - y_min)
+    
+    def update_thresholds(self):
+        """
+        Update thresholds based on environment analysis
+        """
+        if len(self.environment_stats['brightness']) < 10:
+            return
+        
+        # Analyze recent environment data
+        recent_brightness = np.mean(list(self.environment_stats['brightness'])[-10:])
+        recent_contrast = np.mean(list(self.environment_stats['contrast'])[-10:])
+        
+        # Adjust blink threshold based on lighting
+        if recent_brightness < 80:  # Low light
+            brightness_factor = 1.1  # More sensitive in low light
+        elif recent_brightness > 180:  # Bright light
+            brightness_factor = 0.9  # Less sensitive in bright light
+        else:
+            brightness_factor = 1.0
+        
+        # Adjust based on contrast
+        if recent_contrast < 30:  # Low contrast
+            contrast_factor = 1.05
+        else:
+            contrast_factor = 1.0
+        
+        # Update thresholds with smoothing
+        new_blink_threshold = (self.base_thresholds['blink_threshold'] * 
+                              brightness_factor * contrast_factor)
+        
+        self.current_thresholds['blink_threshold'] = (
+            self.current_thresholds['blink_threshold'] * (1 - self.learning_rate) +
+            new_blink_threshold * self.learning_rate
+        )
+        
+        # Clamp to reasonable bounds
+        self.current_thresholds['blink_threshold'] = max(0.15, min(0.35, 
+            self.current_thresholds['blink_threshold']))
+    
+    def get_threshold(self, threshold_name):
+        """
+        Get current adaptive threshold
+        """
+        return self.current_thresholds.get(threshold_name, 
+            self.base_thresholds.get(threshold_name, 0.5))
+
+
+class MemoryManager:
+    """
+    Advanced memory management for long-running applications
+    """
+    
+    def __init__(self, cleanup_interval=100, max_memory_mb=512):
+        """
+        Initialize memory manager
+        """
+        self.cleanup_interval = cleanup_interval
+        self.max_memory_mb = max_memory_mb
+        self.frame_count = 0
+        self.last_cleanup = time.time()
+        
+    def check_memory_usage(self):
+        """
+        Check current memory usage
+        """
+        try:
+            import psutil
+            process = psutil.Process()
+            memory_mb = process.memory_info().rss / 1024 / 1024
+            return memory_mb
+        except:
+            return 0
+    
+    def should_cleanup(self):
+        """
+        Check if memory cleanup is needed
+        """
+        self.frame_count += 1
+        
+        # Check interval
+        if self.frame_count % self.cleanup_interval == 0:
+            return True
+        
+        # Check memory usage
+        memory_usage = self.check_memory_usage()
+        if memory_usage > self.max_memory_mb:
+            return True
+        
+        # Check time
+        if time.time() - self.last_cleanup > 60:  # Every minute
+            return True
+        
+        return False
+    
+    def cleanup(self):
+        """
+        Perform memory cleanup
+        """
+        gc.collect()
+        self.last_cleanup = time.time()
+        
+        # Clear OpenCV cache
+        try:
+            cv2.destroyAllWindows()
+        except:
+            pass
+
+
+# Threading wrapper for concurrent processing
+class ThreadedLivenessProcessor:
+    """
+    Multi-threaded wrapper for concurrent frame processing with advanced optimizations
+    """
+    
+    def __init__(self, max_workers=2, enable_tracking=True, enable_roi=True):
+        self.verifier = OptimizedLivenessVerifier()
+        self.executor = ThreadPoolExecutor(max_workers=max_workers)
+        self.futures = {}
+        
+        # Advanced features
+        self.face_tracker = FaceTracker() if enable_tracking else None
+        self.roi_processor = ROIProcessor() if enable_roi else None
+        self.adaptive_thresholds = AdaptiveThresholdManager()
+        self.memory_manager = MemoryManager()
+        
+        # Performance monitoring
+        self.performance_stats = {
+            'frames_processed': 0,
+            'tracking_hits': 0,
+            'roi_hits': 0,
+            'memory_cleanups': 0
+        }
+    
+    def process_frame_async(self, image, session_id="default"):
+        """
+        Process frame asynchronously with optimizations
+        """
+        # Memory management
+        if self.memory_manager.should_cleanup():
+            self.memory_manager.cleanup()
+            self.performance_stats['memory_cleanups'] += 1
+        
+        # Face tracking optimization
+        if self.face_tracker and self.face_tracker.is_tracking:
+            bbox, quality = self.face_tracker.update_tracking(image)
+            if bbox and quality > 0.7:
+                self.performance_stats['tracking_hits'] += 1
+                # Use ROI processing
+                if self.roi_processor:
+                    roi = self.roi_processor.extract_roi(image, 
+                        self.roi_processor.calculate_roi(image, bbox))
+                    if roi.size > 0:
+                        image = roi
+                        self.performance_stats['roi_hits'] += 1
+        
+        # Environment analysis for adaptive thresholds
+        self.adaptive_thresholds.analyze_environment(image)
+        self.adaptive_thresholds.update_thresholds()
+        
+        # Update verifier thresholds
+        self.verifier.blink_threshold = self.adaptive_thresholds.get_threshold('blink_threshold')
+        
+        # Async processing
+        future = self.executor.submit(self.verifier.process_frame_optimized, image)
+        self.futures[session_id] = future
+        self.performance_stats['frames_processed'] += 1
+        
+        return future
+    
+    def get_result(self, session_id="default", timeout=0.1):
+        """
+        Get result if ready, otherwise return None
+        """
+        if session_id in self.futures:
+            future = self.futures[session_id]
+            try:
+                if future.done():
+                    result = future.result(timeout=timeout)
+                    del self.futures[session_id]
+                    
+                    # Add optimization stats to result
+                    result['optimization_stats'] = self.get_optimization_stats()
+                    return result
+            except Exception as e:
+                print(f"Async processing error: {e}")
+                del self.futures[session_id]
+        return None
+    
+    def get_optimization_stats(self):
+        """
+        Get optimization performance statistics
+        """
+        stats = self.performance_stats.copy()
+        
+        if stats['frames_processed'] > 0:
+            stats['tracking_hit_rate'] = stats['tracking_hits'] / stats['frames_processed']
+            stats['roi_hit_rate'] = stats['roi_hits'] / stats['frames_processed']
+        
+        stats['current_thresholds'] = self.adaptive_thresholds.current_thresholds
+        stats['memory_usage_mb'] = self.memory_manager.check_memory_usage()
+        
+        return stats
+    
+    def cleanup(self):
+        """Cleanup resources"""
+        self.executor.shutdown(wait=False)
+        if self.face_tracker:
+            self.face_tracker.stop_tracking()
+
+
+if __name__ == "__main__":
+    # Performance test with advanced optimizations
+    print("🚀 TESTING OPTIMIZED LANDMARK DETECTION WITH ADVANCED FEATURES")
+    print("=" * 70)
+    
+    # Test standard verifier
+    print("\n📊 Testing Standard OptimizedLivenessVerifier:")
     verifier = OptimizedLivenessVerifier()
     
+    # Test threaded processor with optimizations
+    print("\n🔧 Testing ThreadedLivenessProcessor with Advanced Optimizations:")
+    processor = ThreadedLivenessProcessor(enable_tracking=True, enable_roi=True)
+    
     # Test with dummy image
-    dummy_image = np.zeros((240, 320, 3), dtype=np.uint8)
+    dummy_image = np.zeros((480, 640, 3), dtype=np.uint8)
     
-    # Warmup
-    for _ in range(5):
-        verifier.process_frame_optimized(dummy_image)
-    
-    # Performance test
+    # Standard verifier test
     times = []
     for i in range(20):
         start = time.time()
@@ -575,16 +990,53 @@ if __name__ == "__main__":
         times.append(time.time() - start)
         
         if i % 5 == 0:
-            print(f"Frame {i+1}: {times[-1]*1000:.1f}ms")
+            print(f"Standard Frame {i+1}: {times[-1]*1000:.1f}ms")
     
     avg_time = np.mean(times)
     fps = 1.0 / avg_time
     
-    print(f"\n📊 PERFORMANCE RESULTS:")
+    print(f"\n📈 Standard Verifier Results:")
     print(f"Average processing time: {avg_time*1000:.1f}ms")
     print(f"Estimated FPS: {fps:.1f}")
-    print(f"Min time: {np.min(times)*1000:.1f}ms")
-    print(f"Max time: {np.max(times)*1000:.1f}ms")
     
-    stats = verifier.get_performance_stats()
-    print(f"\nDetailed stats: {stats}")
+    # Advanced processor test
+    print(f"\n🚀 Advanced Processor Test:")
+    opt_times = []
+    for i in range(20):
+        start = time.time()
+        future = processor.process_frame_async(dummy_image, f"test_{i}")
+        result = processor.get_result(f"test_{i}", timeout=1.0)
+        opt_times.append(time.time() - start)
+        
+        if i % 5 == 0 and result:
+            print(f"Advanced Frame {i+1}: {opt_times[-1]*1000:.1f}ms")
+            if 'optimization_stats' in result:
+                opt_stats = result['optimization_stats']
+                print(f"  Memory usage: {opt_stats.get('memory_usage_mb', 0):.1f}MB")
+    
+    opt_avg_time = np.mean(opt_times)
+    opt_fps = 1.0 / opt_avg_time
+    
+    print(f"\n📈 Advanced Processor Results:")
+    print(f"Average processing time: {opt_avg_time*1000:.1f}ms")
+    print(f"Estimated FPS: {opt_fps:.1f}")
+    print(f"Performance improvement: {(avg_time/opt_avg_time-1)*100:.1f}%")
+    
+    # Get final optimization stats
+    final_stats = processor.get_optimization_stats()
+    print(f"\n🎯 Final Optimization Statistics:")
+    for key, value in final_stats.items():
+        if isinstance(value, dict):
+            print(f"{key}:")
+            for sub_key, sub_value in value.items():
+                print(f"  {sub_key}: {sub_value:.3f}")
+        elif isinstance(value, float):
+            print(f"{key}: {value:.3f}")
+        else:
+            print(f"{key}: {value}")
+    
+    # Cleanup
+    processor.cleanup()
+    
+    print("\n🎉 Advanced optimization testing completed!")
+    print("=" * 70)

@@ -1,0 +1,22 @@
+TEST SESSION SUMMARY
+=========================
+
+Session ID: SESSION_20250821_083127_Example_Comprehensive_Test
+Session Name: Example_Comprehensive_Test
+Start Time: 2025-08-21T08:31:27.664093
+End Time: 2025-08-21T08:31:35.543480
+Duration: 0.13 minutes
+Total Tests: 3
+Test Types: antispoofing, face_recognition, integration
+
+TEST BREAKDOWN:
+  Antispoofing: 1 tests
+  Face_Recognition: 1 tests
+  Integration: 1 tests
+
+QUICK PERFORMANCE SUMMARY:
+  Anti-spoofing Average Accuracy: 95.50%
+  Anti-spoofing Average FAR: 0.0550
+  Face Recognition Average Accuracy: 90.00%
+  Average CPU Usage: 37.2%
+  Average FPS: 25.0

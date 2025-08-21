@@ -1,0 +1,12 @@
+{
+  "session_name": "Example_Comprehensive_Test",
+  "start_timestamp": "2025-08-21T08:31:27.664093",
+  "total_tests": 3,
+  "test_types": [
+    "antispoofing",
+    "face_recognition",
+    "integration"
+  ],
+  "end_timestamp": "2025-08-21T08:31:35.543480",
+  "duration_minutes": 0.13132311666666668
+}

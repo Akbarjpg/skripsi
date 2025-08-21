@@ -1,0 +1,25 @@
+Metric,Value,Category
+Test ID,TEST_20250821_083135_a459890d,Test Info
+Test Date,2025-08-21 08:31:35,Test Info
+Test Type,integration,Test Info
+Total Samples,1000,Dataset
+Real Samples,500,Dataset
+Fake Samples,500,Dataset
+Unique Individuals,100,Dataset
+Accuracy,0.95,Anti-Spoofing
+Precision,0.9412,Anti-Spoofing
+Recall,0.96,Anti-Spoofing
+F1 Score,0.9505,Anti-Spoofing
+FAR,0.06,Anti-Spoofing
+FRR,0.04,Anti-Spoofing
+Avg Detection Time,0.154,Anti-Spoofing
+Rank-1 Accuracy,0.88,Face Recognition
+Rank-5 Accuracy,0.95,Face Recognition
+Verification Accuracy,0.9,Face Recognition
+Avg Recognition Time,0.104,Face Recognition
+False Match Rate,0.03,Face Recognition
+False Non-Match Rate,0.07,Face Recognition
+CPU Usage Avg,35.56,Performance
+Memory Usage Avg,11861.74,Performance
+FPS Avg,20.0,Performance
+Total Processing Time,15.3,Performance

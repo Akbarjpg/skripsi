@@ -1,0 +1,57 @@
+ANTI-SPOOFING DETECTION RESULTS - STATISTICAL SUMMARY
+============================================================
+
+Accuracy:
+  Mean: 0.9600
+  Std Dev: 0.0000
+  Min: 0.9600
+  Max: 0.9600
+  Median: 0.9600
+
+Precision:
+  Mean: 0.9466
+  Std Dev: 0.0043
+  Min: 0.9423
+  Max: 0.9510
+  Median: 0.9466
+
+Recall:
+  Mean: 0.9750
+  Std Dev: 0.0050
+  Min: 0.9700
+  Max: 0.9800
+  Median: 0.9750
+
+F1-Score:
+  Mean: 0.9606
+  Std Dev: 0.0002
+  Min: 0.9604
+  Max: 0.9608
+  Median: 0.9606
+
+FAR:
+  Mean: 0.0550
+  Std Dev: 0.0050
+  Min: 0.0500
+  Max: 0.0600
+  Median: 0.0550
+
+FRR:
+  Mean: 0.0250
+  Std Dev: 0.0050
+  Min: 0.0200
+  Max: 0.0300
+  Median: 0.0250
+
+Detection Time (s):
+  Mean: 0.1350
+  Std Dev: 0.0050
+  Min: 0.1300
+  Max: 0.1400
+  Median: 0.1350
+
+Best Performing Test:
+  Test ID: TEST_20250821_083914_80a85552
+  Accuracy: 0.9600
+  FAR: 0.0500
+  FRR: 0.0300

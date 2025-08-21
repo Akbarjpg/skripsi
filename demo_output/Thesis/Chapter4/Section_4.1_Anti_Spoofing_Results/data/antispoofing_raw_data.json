@@ -1,0 +1,76 @@
+[
+  {
+    "test_info": {
+      "test_id": "TEST_20250821_083914_80a85552",
+      "test_date": "2025-08-21 08:39:14",
+      "test_type": "antispoofing",
+      "dataset_info": {
+        "total_samples": 1000,
+        "real_samples": 500,
+        "fake_samples": 500,
+        "unique_individuals": 100
+      }
+    },
+    "results": {
+      "antispoofing": {
+        "accuracy": 0.96,
+        "precision": 0.951,
+        "recall": 0.97,
+        "f1_score": 0.9604,
+        "far": 0.05,
+        "frr": 0.03,
+        "average_detection_time": 0.13,
+        "confusion_matrix": [
+          [
+            485,
+            25
+          ],
+          [
+            15,
+            475
+          ]
+        ]
+      },
+      "face_recognition": null,
+      "performance": null
+    },
+    "detailed_logs": "logs/antispoofing_test1.log"
+  },
+  {
+    "test_info": {
+      "test_id": "TEST_20250821_083914_f583a0e5",
+      "test_date": "2025-08-21 08:39:14",
+      "test_type": "antispoofing",
+      "dataset_info": {
+        "total_samples": 1000,
+        "real_samples": 500,
+        "fake_samples": 500,
+        "unique_individuals": 100
+      }
+    },
+    "results": {
+      "antispoofing": {
+        "accuracy": 0.96,
+        "precision": 0.9423,
+        "recall": 0.98,
+        "f1_score": 0.9608,
+        "far": 0.06,
+        "frr": 0.02,
+        "average_detection_time": 0.14,
+        "confusion_matrix": [
+          [
+            490,
+            30
+          ],
+          [
+            10,
+            470
+          ]
+        ]
+      },
+      "face_recognition": null,
+      "performance": null
+    },
+    "detailed_logs": "logs/antispoofing_test2.log"
+  }
+]

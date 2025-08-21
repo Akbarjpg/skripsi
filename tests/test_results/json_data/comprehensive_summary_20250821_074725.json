@@ -1,0 +1,28 @@
+{
+  "export_info": {
+    "timestamp": "2025-08-21T07:47:25.541039",
+    "exporter_version": "1.0",
+    "data_format": "comprehensive_test_results"
+  },
+  "overall_metrics": {
+    "overall_accuracy": 0.96,
+    "overall_precision": 0.94,
+    "overall_recall": 0.97,
+    "overall_f1_score": 0.95,
+    "system_uptime": 0.99,
+    "avg_processing_time": 1.2,
+    "total_tests_run": 500
+  },
+  "test_results": {},
+  "statistical_summary": {},
+  "export_metadata": {
+    "total_csv_files": 1,
+    "total_latex_files": 4,
+    "output_directories": {
+      "csv": "tests/test_results\\csv_data",
+      "latex": "tests/test_results\\latex_tables",
+      "json": "tests/test_results\\json_data",
+      "logs": "tests/test_results\\detailed_logs"
+    }
+  }
+}

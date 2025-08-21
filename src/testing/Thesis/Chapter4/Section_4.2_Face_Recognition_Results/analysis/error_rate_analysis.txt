@@ -1,0 +1,16 @@
+ERROR RATE ANALYSIS
+=========================
+
+FALSE MATCH RATE (FMR) - Security Metric:
+  Mean: 0.025000
+  Std Dev: 0.005000
+  Maximum: 0.030000
+
+FALSE NON-MATCH RATE (FNMR) - Convenience Metric:
+  Mean: 0.050000
+  Std Dev: 0.020000
+  Maximum: 0.070000
+
+SECURITY ASSESSMENT:
+  High Security Tests (FMR ≤ 0.1%): 0/2
+  Average Security Level: Medium

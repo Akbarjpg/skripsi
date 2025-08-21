@@ -1,0 +1,5 @@
+scenario,total_samples,tp,tn,fp,fn,accuracy,precision,recall,f1_score,avg_detection_time
+printed_photos,179,85,89,2,3,0.972,0.977,0.966,0.971,0.633
+digital_displays,191,84,93,7,7,0.927,0.923,0.923,0.923,1.946
+video_replays,183,86,89,2,6,0.956,0.977,0.935,0.956,1.224
+masks_3d,190,89,86,7,8,0.921,0.927,0.918,0.922,1.868

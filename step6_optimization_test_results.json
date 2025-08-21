@@ -1,0 +1,243 @@
+{
+  "model_optimization": {
+    "performance_comparison": {
+      "standard_avg_time": 0.0016353845596313477,
+      "standard_fps": 611.4769728689516,
+      "quantized_avg_time": 0.0008554339408874511,
+      "quantized_fps": 1168.9973383129643,
+      "speedup_factor": 1.9117601973271647
+    },
+    "optimization_pipeline": {
+      "success": false,
+      "error": "Only Tensors created explicitly by the user (graph leaves) support the deepcopy protocol at the moment.  If you were attempting to deepcopy a module, this may be because of a torch.nn.utils.weight_norm usage, see https://github.com/pytorch/pytorch/pull/103001"
+    },
+    "caching_performance": {
+      "no_cache_avg_time": 0.01456298828125,
+      "cache_avg_time": 0.0014560699462890625,
+      "cache_speedup": 10.001571915116584,
+      "cache_hit_ratio": 0.09090909090909091,
+      "cache_size": 1
+    },
+    "ensemble_voting": {
+      "success": false,
+      "error": "'OptimizedLivenessPredictor' object has no attribute 'eval'"
+    }
+  },
+  "processing_pipeline_optimization": {
+    "face_tracking": {
+      "avg_tracking_time": 0.006421899795532227,
+      "avg_detection_time": 0.010533976554870605,
+      "tracking_speedup": 1.640320915969319,
+      "tracking_success_rate": 0.1
+    },
+    "roi_processing": {
+      "avg_full_time": 0.0003999948501586914,
+      "avg_roi_time": 0.00030100345611572266,
+      "roi_speedup": 1.328871287128713
+    },
+    "frame_skipping": {
+      "1": {
+        "avg_time": 0.007750213146209717,
+        "effective_fps": 129.0287094218893,
+        "frames_processed": 20
+      },
+      "2": {
+        "avg_time": 0.004012250900268554,
+        "effective_fps": 124.61832832202323,
+        "frames_processed": 10
+      },
+      "3": {
+        "avg_time": 0.002259322575160435,
+        "effective_fps": 147.5368488758907,
+        "frames_processed": 7
+      },
+      "5": {
+        "avg_time": 0.0016990900039672852,
+        "effective_fps": 117.7100680558479,
+        "frames_processed": 4
+      }
+    },
+    "threaded_processing": {
+      "sequential_avg_time": 0.002217006683349609,
+      "threaded_avg_time": 0,
+      "threading_speedup": 0
+    }
+  },
+  "resource_management": {
+    "memory_management": {
+      "initial_memory_mb": 1036.8671875,
+      "final_memory_mb": 1039.69921875,
+      "cleanup_triggered": true,
+      "memory_saved_mb": 0
+    },
+    "cpu_monitoring": {
+      "avg_cpu_usage": 13.0,
+      "max_cpu_usage": 21.6,
+      "cpu_readings": [
+        18.8,
+        21.6,
+        15.1,
+        16.4,
+        10.6,
+        0.0,
+        8.0,
+        18.0,
+        14.0,
+        7.5
+      ]
+    },
+    "gpu_availability": {
+      "available": true,
+      "info": {
+        "device_count": 1,
+        "device_name": "NVIDIA GeForce MX130",
+        "memory_allocated": 0.24462890625,
+        "memory_cached": 2.0
+      }
+    },
+    "dynamic_fps": {
+      "adjustments": [
+        {
+          "cpu_load": 30,
+          "adjusted_fps": 30,
+          "adjustment_factor": 1.0
+        },
+        {
+          "cpu_load": 50,
+          "adjusted_fps": 30,
+          "adjustment_factor": 1.0
+        },
+        {
+          "cpu_load": 70,
+          "adjusted_fps": 30,
+          "adjustment_factor": 1.0
+        },
+        {
+          "cpu_load": 85,
+          "adjusted_fps": 21.0,
+          "adjustment_factor": 0.7
+        },
+        {
+          "cpu_load": 95,
+          "adjusted_fps": 21.0,
+          "adjustment_factor": 0.7
+        }
+      ],
+      "adaptive_behavior": true
+    }
+  },
+  "accuracy_improvements": {
+    "adaptive_thresholds": {
+      "success": true,
+      "adaptations": [
+        {
+          "condition": "low_light",
+          "brightness": 50,
+          "contrast": 20,
+          "adapted_threshold": 0.22
+        },
+        {
+          "condition": "normal_light",
+          "brightness": 120,
+          "contrast": 40,
+          "adapted_threshold": 0.22
+        },
+        {
+          "condition": "bright_light",
+          "brightness": 200,
+          "contrast": 30,
+          "adapted_threshold": 0.22
+        }
+      ],
+      "base_threshold": 0.22
+    },
+    "temporal_consistency": {
+      "original_variance": 0.0033810000000000008,
+      "smoothed_variance": 0.0032640277777777767,
+      "improvement": 0.00011697222222222404,
+      "decision_consistency": 0.5101020514433643,
+      "smoothing_effective": "True"
+    },
+    "data_augmentation": {
+      "original_confidence": 0.5,
+      "augmented_confidences": [
+        0.5,
+        0.5,
+        0.5
+      ],
+      "ensemble_confidence": 0.5,
+      "confidence_std": 0.0,
+      "augmentations_successful": 3
+    }
+  },
+  "integration_performance": {
+    "web_integration": {
+      "avg_processing_time": 0.027995431423187257,
+      "max_processing_time": 0.41460347175598145,
+      "min_processing_time": 0.0,
+      "estimated_fps": 35.720113931580585,
+      "performance_stats": {
+        "system_resources": {
+          "cpu_percent": 47.9,
+          "memory_mb": 11907.23046875,
+          "gpu_usage": 0,
+          "current_fps": 30,
+          "frame_skip_interval": 2
+        },
+        "performance_metrics": {
+          "frames_processed": 10,
+          "cache_hits": 0,
+          "early_exits": 0,
+          "tracking_hits": 0,
+          "roi_optimizations": 0,
+          "memory_cleanups": 2,
+          "fps_adjustments": 0
+        },
+        "cache_hit_ratio": 0.0,
+        "adaptive_thresholds": {
+          "confidence": 0.9,
+          "blink": 0.22,
+          "movement": 0.01
+        },
+        "profiler_report": {
+          "average_inference_time": 0.05143918991088867,
+          "estimated_fps": 19.44043056922869,
+          "average_memory_delta": 8.09453125,
+          "average_cpu_usage": 76.41999999999999,
+          "total_samples": 10,
+          "average_accuracy": 0.0
+        },
+        "optimizations_active": {
+          "model_quantization": true,
+          "face_tracking": true,
+          "roi_processing": true,
+          "ensemble_voting": false,
+          "dynamic_fps": true,
+          "gpu_acceleration": true
+        }
+      },
+      "optimization_features_active": 10
+    },
+    "error": "name 'gc' is not defined"
+  },
+  "summary": {
+    "test_duration": 11.881509780883789,
+    "memory_usage": 262.3671875,
+    "tests_passed": 4,
+    "tests_failed": 1,
+    "optimization_features_verified": [
+      "model_optimization",
+      "processing_pipeline_optimization",
+      "resource_management",
+      "accuracy_improvements"
+    ],
+    "performance_improvements": {
+      "quantization_speedup": 1.9117601973271647,
+      "cache_speedup": 10.001571915116584
+    },
+    "recommendations": [
+      "Install missing optimization dependencies",
+      "Consider implementing more aggressive memory cleanup"
+    ]
+  }
+}

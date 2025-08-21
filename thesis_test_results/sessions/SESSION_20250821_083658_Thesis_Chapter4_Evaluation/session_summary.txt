@@ -1,0 +1,22 @@
+TEST SESSION SUMMARY
+=========================
+
+Session ID: SESSION_20250821_083658_Thesis_Chapter4_Evaluation
+Session Name: Thesis_Chapter4_Evaluation
+Start Time: 2025-08-21T08:36:58.728017
+End Time: 2025-08-21T08:37:13.904064
+Duration: 0.25 minutes
+Total Tests: 6
+Test Types: antispoofing, face_recognition, integration
+
+TEST BREAKDOWN:
+  Antispoofing: 3 tests
+  Face_Recognition: 2 tests
+  Integration: 1 tests
+
+QUICK PERFORMANCE SUMMARY:
+  Anti-spoofing Average Accuracy: 95.50%
+  Anti-spoofing Average FAR: 0.0550
+  Face Recognition Average Accuracy: 88.33%
+  Average CPU Usage: 36.1%
+  Average FPS: 25.8

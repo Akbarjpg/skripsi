@@ -1,0 +1,27 @@
+ACCURACY VS PERFORMANCE TRADE-OFFS
+========================================
+
+TRADE-OFF ANALYSIS:
+
+Test: TEST_20250821_083130_d7004c8c
+  Anti-spoofing Accuracy: 0.9600
+  CPU Usage: 48.65%
+  Processing Time: 0.930s
+  FPS: 25.00
+  Trade-off Score: 7.04/10
+
+Test: TEST_20250821_083132_72f1627f
+  Face Recognition Accuracy: 0.9200
+  CPU Usage: 27.45%
+  Processing Time: 0.510s
+  FPS: 30.00
+  Trade-off Score: 7.48/10
+
+Test: TEST_20250821_083135_a459890d
+  Anti-spoofing Accuracy: 0.9500
+  Face Recognition Accuracy: 0.8800
+  CPU Usage: 35.56%
+  Processing Time: 15.300s
+  FPS: 20.00
+  Trade-off Score: 6.94/10
+

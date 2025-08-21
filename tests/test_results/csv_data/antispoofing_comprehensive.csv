@@ -1,0 +1,6 @@
+attack_scenario,description,difficulty_level,total_samples,true_positives,true_negatives,false_positives,false_negatives,accuracy,precision,recall,f1_score,specificity,avg_detection_time_ms,confidence_interval_lower,confidence_interval_upper
+printed_photos,High-resolution photo prints,easy,150,71,71,1,7,0.9467,0.9861,0.9103,0.9467,0.9861,869.11,0.8967,0.9967
+digital_displays,Digital screen displays (laptop/phone),medium,180,80,80,5,15,0.8889,0.9412,0.8421,0.8889,0.9412,1164.16,0.8389,0.9389
+video_replays,Video replay attacks,medium,160,71,71,5,13,0.8875,0.9342,0.8452,0.8875,0.9342,1266.08,0.8375,0.9375
+masks_3d,3D printed masks,hard,120,49,49,6,16,0.8167,0.8909,0.7538,0.8167,0.8909,1723.76,0.7667,0.8667
+deepfake_videos,AI-generated deepfake videos,very_hard,100,37,37,7,19,0.7400,0.8409,0.6607,0.7400,0.8409,2154.20,0.6900,0.7900

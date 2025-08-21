@@ -1,0 +1,24 @@
+SYSTEM LIMITATIONS ANALYSIS
+===================================
+
+IDENTIFIED LIMITATIONS:
+
+1. HARDWARE DEPENDENCIES:
+   - High CPU usage may limit deployment on low-end devices
+   - Memory requirements may exceed mobile device capabilities
+   - Camera quality affects detection accuracy
+
+2. ENVIRONMENTAL CONSTRAINTS:
+   - Lighting conditions impact performance
+   - Background clutter may interfere with face detection
+   - Network latency affects real-time processing
+
+3. SCALABILITY CONCERNS:
+   - Processing time increases with database size
+   - Memory usage scales with number of registered users
+   - Concurrent user handling needs optimization
+
+4. ACCURACY LIMITATIONS:
+   - Lowest anti-spoofing accuracy: 95.00%
+   - Highest false acceptance rate: 0.0600
+   - Lowest face recognition accuracy: 88.00%

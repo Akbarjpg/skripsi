@@ -1,0 +1,49 @@
+{
+  "test_info": {
+    "test_id": "TEST_20250821_083713_ab53d096",
+    "test_date": "2025-08-21 08:37:13",
+    "test_type": "integration",
+    "dataset_info": {
+      "total_samples": 1000,
+      "real_samples": 500,
+      "fake_samples": 500,
+      "unique_individuals": 100
+    }
+  },
+  "results": {
+    "antispoofing": {
+      "accuracy": 0.94,
+      "precision": 0.9314,
+      "recall": 0.95,
+      "f1_score": 0.9406,
+      "far": 0.07,
+      "frr": 0.05,
+      "average_detection_time": 0.154,
+      "confusion_matrix": [
+        [
+          475,
+          35
+        ],
+        [
+          25,
+          465
+        ]
+      ]
+    },
+    "face_recognition": {
+      "rank1_accuracy": 0.85,
+      "rank5_accuracy": 0.92,
+      "verification_accuracy": 0.87,
+      "average_recognition_time": 0.104,
+      "false_match_rate": 0.04,
+      "false_non_match_rate": 0.09
+    },
+    "performance": {
+      "cpu_usage_avg": 37.84,
+      "memory_usage_avg": 11838.31,
+      "fps_avg": 20.0,
+      "total_processing_time": 15.3
+    }
+  },
+  "detailed_logs": "logs/integration_test_detailed.log"
+}

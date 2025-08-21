@@ -1,0 +1,279 @@
+# Face Attendance System - Optimization Settings Configuration
+# Comprehensive configuration for real-world deployment performance
+
+# Model Optimization Settings
+model_optimization:
+  # CNN Model Settings
+  cnn:
+    use_quantization: true
+    quantization_type: "dynamic" # Options: dynamic, static, qat
+    model_pruning:
+      enabled: true
+      sparsity: 0.3 # Remove 30% of redundant neurons
+    onnx_export:
+      enabled: true
+      opset_version: 11
+      optimization_level: "all"
+    input_size: 112 # Reduced from 224 for faster inference
+    batch_size: 1 # Single image processing for real-time
+
+  # Model Caching
+  model_cache:
+    enabled: true
+    max_cache_size: 100 # Number of cached predictions
+    cache_duration: 0.1 # 100ms cache duration
+    similarity_threshold: 0.95 # Cache hit threshold
+
+  # Ensemble Settings
+  ensemble:
+    enabled: false # Disable for single-user scenarios
+    models: ["cnn", "landmark"]
+    weights: [0.7, 0.3]
+    voting_strategy: "weighted"
+
+# Processing Pipeline Optimization
+processing_pipeline:
+  # Face Detection & Tracking
+  face_detection:
+    use_tracking: true
+    tracking_quality_threshold: 0.7
+    max_tracking_frames: 30
+    redetection_interval: 10 # frames
+
+  # Region of Interest (ROI)
+  roi:
+    enabled: true
+    face_expansion_factor: 1.2 # Expand face bbox by 20%
+    roi_update_frequency: 5 # Update ROI every 5 frames
+
+  # Frame Processing
+  frame_processing:
+    frame_skip: 2 # Process every 2nd frame
+    early_exit_threshold: 0.95 # Exit early if confidence > 95%
+    batch_processing:
+      enabled: false # Single frame for real-time
+      max_batch_size: 4
+
+  # Anti-spoofing Pipeline
+  antispoofing:
+    multi_stage: true
+    stages:
+      - name: "quick_check"
+        model: "lightweight_cnn"
+        threshold: 0.3
+        exit_on_fail: true
+      - name: "detailed_check"
+        model: "full_cnn"
+        threshold: 0.85
+
+  # Challenge-Response Optimization
+  challenges:
+    adaptive_selection: true
+    time_limit: 8 # seconds per challenge
+    retry_limit: 2
+    parallel_validation: true
+
+# Resource Management
+resource_management:
+  # Webcam Settings
+  webcam:
+    resolution:
+      width: 640 # Reduced from 1280
+      height: 480 # Reduced from 720
+    fps_target: 30
+    dynamic_fps: true
+    fps_adjustment_threshold: 0.8 # Adjust if CPU > 80%
+
+  # CPU Management
+  cpu:
+    max_cpu_usage: 75 # Maximum CPU usage percentage
+    thread_count: 2 # Number of processing threads
+    priority: "high" # Process priority
+
+  # Memory Management
+  memory:
+    max_memory_mb: 512 # Maximum memory usage
+    cleanup_interval: 100 # frames
+    garbage_collection: true
+    landmark_history_limit: 15
+
+  # GPU Acceleration
+  gpu:
+    enabled: true
+    device: "auto" # auto, cuda, cpu
+    memory_fraction: 0.3 # Use 30% of GPU memory
+    allow_growth: true
+
+# Accuracy Improvements
+accuracy_improvements:
+  # Temporal Consistency
+  temporal:
+    enabled: true
+    window_size: 5 # frames
+    consistency_threshold: 0.7
+    smoothing_factor: 0.3
+
+  # Data Augmentation (Inference)
+  augmentation:
+    enabled: false # Disable for real-time
+    techniques: ["horizontal_flip", "slight_rotation"]
+    augmentation_count: 3
+
+  # Adaptive Thresholds
+  adaptive_thresholds:
+    enabled: true
+    environment_factors:
+      lighting_adaptation: true
+      face_size_adaptation: true
+      movement_adaptation: true
+    learning_rate: 0.05
+
+  # Quality Validation
+  quality_validation:
+    enabled: true
+    min_face_size: 60 # pixels
+    max_blur_threshold: 100
+    min_brightness: 30
+    max_brightness: 220
+
+# Performance Monitoring
+monitoring:
+  # Real-time Metrics
+  realtime_metrics:
+    enabled: true
+    update_interval: 1.0 # seconds
+    metrics:
+      - "fps"
+      - "cpu_usage"
+      - "memory_usage"
+      - "processing_time"
+      - "accuracy"
+
+  # Performance Alerts
+  alerts:
+    enabled: true
+    thresholds:
+      low_fps: 10 # Alert if FPS < 10
+      high_cpu: 85 # Alert if CPU > 85%
+      high_memory: 400 # Alert if memory > 400MB
+      high_latency: 200 # Alert if latency > 200ms
+
+  # Logging
+  logging:
+    performance_log: true
+    error_log: true
+    debug_mode: false
+    log_rotation: true
+    max_log_size_mb: 50
+
+# Security & Privacy
+security:
+  # Data Protection
+  data_protection:
+    encrypt_embeddings: true
+    secure_storage: true
+    data_retention_days: 90
+
+  # Rate Limiting
+  rate_limiting:
+    enabled: true
+    max_attempts_per_minute: 30
+    cooldown_period: 60 # seconds
+
+  # Suspicious Activity Detection
+  anomaly_detection:
+    enabled: true
+    multiple_failure_threshold: 5
+    time_window: 300 # 5 minutes
+    block_duration: 900 # 15 minutes
+
+# Environment-specific Settings
+environment:
+  # Development Settings
+  development:
+    debug_mode: true
+    verbose_logging: true
+    performance_profiling: true
+    test_mode: false
+
+  # Production Settings
+  production:
+    debug_mode: false
+    verbose_logging: false
+    performance_profiling: false
+    optimization_level: "maximum"
+
+  # Testing Settings
+  testing:
+    synthetic_data: true
+    benchmark_mode: true
+    stress_testing: false
+
+# Hardware-specific Optimizations
+hardware_optimizations:
+  # CPU-specific
+  cpu_specific:
+    intel:
+      use_mkl: true
+      threading: "intel"
+    amd:
+      use_blas: true
+      threading: "openmp"
+
+  # GPU-specific
+  gpu_specific:
+    nvidia:
+      use_tensorrt: false # Requires TensorRT installation
+      use_cudnn: true
+      mixed_precision: false
+    amd:
+      use_rocm: false
+
+  # Memory-specific
+  memory_specific:
+    low_memory_mode: false
+    memory_mapping: true
+    swap_usage: false
+
+# Integration Settings
+integration:
+  # Database Optimization
+  database:
+    connection_pooling: true
+    max_connections: 10
+    query_optimization: true
+    indexing: true
+
+  # API Optimization
+  api:
+    response_compression: true
+    caching: true
+    rate_limiting: true
+    async_processing: true
+
+  # Web Interface
+  web_interface:
+    image_compression: true
+    lazy_loading: true
+    progressive_enhancement: true
+    offline_capability: false
+
+# Backup & Recovery
+backup_recovery:
+  # Model Backup
+  model_backup:
+    enabled: true
+    backup_interval: 24 # hours
+    max_backups: 7
+
+  # Data Backup
+  data_backup:
+    enabled: true
+    incremental: true
+    compression: true
+
+  # System Recovery
+  recovery:
+    auto_recovery: true
+    recovery_timeout: 30 # seconds
+    fallback_mode: true

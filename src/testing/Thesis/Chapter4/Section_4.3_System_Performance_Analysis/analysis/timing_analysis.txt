@@ -1,0 +1,21 @@
+PROCESSING TIME ANALYSIS
+==============================
+
+ANTISPOOFING PROCESSING TIMES:
+  Mean: 0.930s
+  Std Dev: 0.000s
+  Range: 0.930s - 0.930s
+  Real-time Suitable: Yes
+
+FACE_RECOGNITION PROCESSING TIMES:
+  Mean: 0.510s
+  Std Dev: 0.000s
+  Range: 0.510s - 0.510s
+  Real-time Suitable: Yes
+
+INTEGRATION PROCESSING TIMES:
+  Mean: 15.300s
+  Std Dev: 0.000s
+  Range: 15.300s - 15.300s
+  Real-time Suitable: No
+

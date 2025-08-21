@@ -1,0 +1,43 @@
+# Requirements for Comprehensive Testing Framework
+# For thesis data collection and analysis
+
+# Core testing and data analysis
+numpy>=1.21.0
+pandas>=1.3.0
+scipy>=1.7.0
+
+# Visualization and reporting
+matplotlib>=3.5.0
+seaborn>=0.11.0
+
+# System monitoring
+psutil>=5.8.0
+
+# GPU monitoring (optional)
+GPUtil>=1.4.0
+
+# Data export formats
+openpyxl>=3.0.0
+
+# Computer vision (if using actual models)
+opencv-python>=4.5.0
+mediapipe>=0.8.0
+
+# Deep learning (if using actual models)
+torch>=1.9.0
+torchvision>=0.10.0
+
+# Web framework (if testing web interface)
+flask>=2.0.0
+flask-socketio>=5.0.0
+
+# Database
+sqlite3  # Usually included with Python
+
+# Development and testing
+pytest>=6.0.0
+pytest-cov>=3.0.0
+
+# Utilities
+tqdm>=4.60.0
+pathlib2>=2.3.0

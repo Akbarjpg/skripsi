@@ -1,0 +1,15 @@
+Metric,Value,Category
+Test ID,TEST_20250821_083410_9f8f033f,Test Info
+Test Date,2025-08-21 08:34:10,Test Info
+Test Type,antispoofing,Test Info
+Total Samples,100,Dataset
+Real Samples,50,Dataset
+Fake Samples,50,Dataset
+Unique Individuals,25,Dataset
+Accuracy,0.95,Anti-Spoofing
+Precision,0.9412,Anti-Spoofing
+Recall,0.96,Anti-Spoofing
+F1 Score,0.9505,Anti-Spoofing
+FAR,0.06,Anti-Spoofing
+FRR,0.04,Anti-Spoofing
+Avg Detection Time,0.13,Anti-Spoofing

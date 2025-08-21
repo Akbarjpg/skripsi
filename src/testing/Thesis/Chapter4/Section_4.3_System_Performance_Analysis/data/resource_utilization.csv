@@ -1,0 +1,4 @@
+Test_ID,Test_Type,CPU_Usage_Avg,Memory_Usage_Avg,FPS_Avg,Processing_Time
+TEST_20250821_083130_d7004c8c,antispoofing,48.65,11780.33,25.0,0.93
+TEST_20250821_083132_72f1627f,face_recognition,27.45,11818.05,30.0,0.51
+TEST_20250821_083135_a459890d,integration,35.56,11861.74,20.0,15.3
